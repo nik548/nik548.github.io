@@ -15,6 +15,7 @@
       background: #fff0f5;
     }
 
+    /* Card container */
     .card {
       width: 300px;
       height: 200px;
@@ -35,6 +36,7 @@
       transform: rotateY(180deg);
     }
 
+    /* Card faces */
     .card-face {
       position: absolute;
       width: 100%;
@@ -56,14 +58,96 @@
     .card-back {
       background: #ffe4e1;
       transform: rotateY(180deg);
+      position: relative;
+      flex-direction: column;
     }
+
+    /* Reason text on back */
+    #reason-text {
+      text-align: center;
+      max-width: 240px;
+    }
+
+    /* Animal container (bottom right) */
+    .animal {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: dance 1s infinite ease-in-out;
+    }
+
+    /* Dancing animation */
+    @keyframes dance {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-5px) rotate(5deg); }
+    }
+
+    /* Animal variations (minimal silhouettes) */
+    .animal.cat {
+      background: #ffcccb;
+      border-radius: 50%;
+      position: relative;
+    }
+    .animal.cat::before, .animal.cat::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      width: 15px;
+      height: 15px;
+      background: #ffcccb;
+      border-radius: 50%;
+    }
+    .animal.cat::before { left: 5px; }
+    .animal.cat::after { right: 5px; }
+
+    .animal.bunny {
+      background: #f4f4f4;
+      border-radius: 50%;
+      position: relative;
+    }
+    .animal.bunny::before, .animal.bunny::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      width: 10px;
+      height: 20px;
+      background: #f4f4f4;
+      border-radius: 50%;
+    }
+    .animal.bunny::before { left: 15px; }
+    .animal.bunny::after { right: 15px; }
+
+    .animal.bear {
+      background: #deb887;
+      border-radius: 50%;
+      position: relative;
+    }
+    .animal.bear::before, .animal.bear::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 12px;
+      height: 12px;
+      background: #deb887;
+      border-radius: 50%;
+    }
+    .animal.bear::before { left: 8px; }
+    .animal.bear::after { right: 8px; }
   </style>
 </head>
 <body>
   <div class="card" id="card">
     <div class="card-inner">
       <div class="card-face card-front" id="card-front"></div>
-      <div class="card-face card-back" id="card-back"></div>
+      <div class="card-face card-back" id="card-back">
+        <div id="reason-text"></div>
+        <div id="animal" class="animal"></div>
+      </div>
     </div>
   </div>
 
@@ -73,7 +157,9 @@
       "You always make me laugh.",
       "You’re my biggest supporter.",
       "I love how you scrunch your nose when you smile.",
-      // ... Add up to 100 reasons here
+      "You make even ordinary days special.",
+      "You believe in me when I doubt myself.",
+      // ... continue until 100 reasons
     ];
 
     // Shuffle function
@@ -96,23 +182,35 @@
       return shuffledReasons[reasonIndex++];
     }
 
+    // Random animal
+    const animals = ['cat', 'bunny', 'bear'];
+    function getRandomAnimalClass() {
+      return animals[Math.floor(Math.random() * animals.length)];
+    }
+
+    function updateBackContent() {
+      document.getElementById('reason-text').textContent = getNextReason();
+      const animalDiv = document.getElementById('animal');
+      animalDiv.className = `animal ${getRandomAnimalClass()}`;
+    }
+
     // Set today's date
     const today = new Date().toLocaleDateString('en-US', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
     document.getElementById('card-front').textContent = today;
 
-    // First reason
-    document.getElementById('card-back').textContent = getNextReason();
+    // Initial reason + animal
+    updateBackContent();
 
     const card = document.getElementById('card');
 
-    // Flip card on click
+    // Flip logic
     card.addEventListener('click', () => {
       card.classList.toggle('flipped');
       if (!card.classList.contains('flipped')) {
-        // When flipped back, load next reason
-        document.getElementById('card-back').textContent = getNextReason();
+        // When flipped back to front, prep next back content
+        updateBackContent();
       }
     });
   </script>
