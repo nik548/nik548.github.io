@@ -13,18 +13,30 @@
       font-family: 'Poppins', sans-serif;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;    /* space title, card, countdown */
       align-items: center;
-      padding-top: 40px;
-      min-height: 100vh;
+      height: 100vh;
+      padding: 20px 0;
       background: linear-gradient(180deg, #ffe4e8 0%, #fff0f5 100%);
       position: relative;
       overflow: hidden;
     }
 
-    /* Fade-in */
+    /* Polka‑dot overlay */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(#ffccd5 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+    /* Fade‑in keyframes */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     /* Title */
@@ -32,34 +44,9 @@
       font-size: 32px;
       font-weight: 600;
       color: #d6336c;
-      margin-bottom: 20px;
       opacity: 0;
       animation: fadeIn 1.2s ease forwards;
     }
-
-    /* Floating flowers */
-    .flower {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      background: #ffb6c1;
-      border-radius: 50%;
-      transform: scale(0);
-      animation: bloom 1s forwards, sway 6s ease-in-out infinite;
-      opacity: 0.8;
-    }
-    @keyframes bloom { to { transform: scale(1); } }
-    @keyframes sway {
-      0%,100% { transform: translateX(0); }
-      50%    { transform: translateX(5px); }
-    }
-    /* Positions */
-    .flower:nth-child(1) { top: 15%; left: 10%; animation-delay: 0.2s; }
-    .flower:nth-child(2) { top: 40%; left: 20%; animation-delay: 0.4s; }
-    .flower:nth-child(3) { top: 70%; left: 15%; animation-delay: 0.6s; }
-    .flower:nth-child(4) { top: 25%; right: 15%; animation-delay: 0.3s; }
-    .flower:nth-child(5) { top: 55%; right: 20%; animation-delay: 0.5s; }
-    .flower:nth-child(6) { top: 85%; right: 10%; animation-delay: 0.7s; }
 
     /* Card frame & container */
     .card {
@@ -70,11 +57,10 @@
       box-shadow: 0 4px 20px rgba(255, 182, 193, 0.5);
       background: #fff;
       cursor: pointer;
-      margin-bottom: 20px;
+      perspective: 1000px;
       opacity: 0;
       animation: fadeIn 1.5s ease forwards;
       animation-delay: 0.5s;
-      perspective: 1000px;
     }
     .card-inner {
       width: 100%;
@@ -87,7 +73,7 @@
       transform: rotateY(180deg);
     }
 
-    /* Faces */
+    /* Card faces */
     .card-face {
       position: absolute;
       width: 100%; height: 100%;
@@ -104,7 +90,7 @@
     .card-back {
       background: #ffe4e1;
       transform: rotateY(180deg);
-      padding-bottom: 80px;
+      padding-bottom: 80px;  /* room for animal */
       justify-content: flex-start;
     }
 
@@ -137,6 +123,7 @@
       background: #000; border-radius: 50%;
       top: 20px; left: 15px; box-shadow: 20px 0 #000;
     }
+
     /* Cat */
     .animal.cat { background: #ffcccb; }
     .animal.cat .ear {
@@ -153,7 +140,7 @@
       content:''; position:absolute; width:40px; height:2px; background:#000;
     }
     .animal.cat .whiskers::before { transform:rotate(10deg); }
-    .animal.cat .whiskers::after { transform:rotate(-10deg); }
+    .animal.cat .whiskers::after  { transform:rotate(-10deg); }
 
     /* Bunny */
     .animal.bunny { background: #f4f4f4; }
@@ -161,7 +148,7 @@
       position:absolute; width:12px; height:30px; background:#f4f4f4;
       top:-30px; border-radius:50%;
     }
-    .animal.bunny .ear.left { left:10px; }
+    .animal.bunny .ear.left  { left:10px; }
     .animal.bunny .ear.right { right:10px; }
     .animal.bunny .blush {
       position:absolute; bottom:10px; left:8px;
@@ -175,27 +162,24 @@
       position:absolute; width:14px; height:14px; background:#deb887;
       top:-8px; border-radius:50%;
     }
-    .animal.bear .ear.left { left:8px; }
+    .animal.bear .ear.left  { left:8px; }
     .animal.bear .ear.right { right:8px; }
     .animal.bear .nose {
       position:absolute; top:30px; left:26px;
       width:10px; height:8px; border-radius:50%; background:#333;
     }
 
-    /* Countdown */
+    /* Countdown (bigger & centered) */
     #countdown {
-      position: fixed; bottom: 20px;
-      background: rgba(255,255,255,0.8);
-      padding: 5px 10px; border-radius: 8px;
-      font-size: 16px; color: #444;
+      font-size: 20px;
+      color: #444;
+      background: rgba(255,255,255,0.9);
+      padding: 8px 12px;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <!-- Floating accents -->
-  <div class="flower"></div><div class="flower"></div><div class="flower"></div>
-  <div class="flower"></div><div class="flower"></div><div class="flower"></div>
-
   <!-- Title -->
   <h1>100 Reasons I Love You</h1>
 
@@ -216,7 +200,7 @@
   <div id="countdown"></div>
 
   <script>
-    // List of reasons
+    // Your 100 reasons (fill to 100)
     const reasons = [
       "You always make me laugh.", "You’re my biggest supporter.",
       "I love how you scrunch your nose when you smile.",
@@ -224,55 +208,65 @@
       "You believe in me when I doubt myself.",
       // ...continue to 100
     ];
-
-    // Shuffle
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
-    let shuffled = shuffle([...reasons]), idx=0;
+    // Shuffle helper
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    }
+    let list = shuffle([...reasons]), idx = 0;
     function nextReason(){
-      if(idx>=shuffled.length){ shuffled=shuffle([...reasons]); idx=0;}
-      return shuffled[idx++];
+      if(idx >= list.length){
+        list = shuffle([...reasons]); idx = 0;
+      }
+      return list[idx++];
     }
 
-    // Daily reset at 7AM EST
+    // Compute next 7 AM EST reset
     function getNextReset(){
-      const now=new Date();
-      const off=now.getTimezoneOffset() + 5*60; // local to EST offset
-      const nowEst=new Date(now.getTime()+off*60000);
-      let reset=new Date(nowEst);
+      const now = new Date(),
+            off = now.getTimezoneOffset() + 5*60,
+            nowEst = new Date(now.getTime() + off*60000);
+      let reset = new Date(nowEst);
       reset.setHours(7,0,0,0);
-      if(nowEst>=reset) reset.setDate(reset.getDate()+1);
-      return new Date(reset.getTime()-off*60000);
+      if(nowEst >= reset) reset.setDate(reset.getDate()+1);
+      return new Date(reset.getTime() - off*60000 - now.getTimezoneOffset()*60000);
     }
-    const nextReset=getNextReset();
+    const nextReset = getNextReset();
 
-    // Countdown
+    // Countdown update
     function updateCountdown(){
-      const diff=nextReset - new Date();
-      if(diff<=0) return location.reload();
-      const h=String(Math.floor(diff/3600000)).padStart(2,'0');
-      const m=String(Math.floor(diff%3600000/60000)).padStart(2,'0');
-      const s=String(Math.floor(diff%60000/1000)).padStart(2,'0');
-      document.getElementById('countdown').innerText=`Countdown to next card: ${h}:${m}:${s}`;
+      const diff = nextReset - new Date();
+      if(diff <= 0) return location.reload();
+      const h = String(Math.floor(diff/3600000)).padStart(2,'0'),
+            m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0'),
+            s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+      document.getElementById('countdown').innerText =
+        `Countdown to next card: ${h}:${m}:${s}`;
     }
-    setInterval(updateCountdown,1000); updateCountdown();
+    setInterval(updateCountdown,1000);
+    updateCountdown();
 
-    // Pick today's reason (persist)
-    let today=localStorage.getItem('todayReason'),
-        exp=localStorage.getItem('expiry');
-    if(!today || new Date(exp)<=new Date()){
-      today=nextReason();
-      localStorage.setItem('todayReason',today);
+    // Pick or restore today's reason
+    const stored    = localStorage.getItem('todayReason'),
+          expiry    = localStorage.getItem('expiry'),
+          isValid   = stored && new Date(expiry) > new Date();
+    let today = isValid ? stored : nextReason();
+    if(!isValid){
+      localStorage.setItem('todayReason', today);
       localStorage.setItem('expiry', nextReset);
     }
 
     // Animal logic
-    const animals=['cat','bunny','bear'];
-    function randAnimal(){return animals[Math.floor(Math.random()*animals.length)];}
+    const animals = ['cat','bunny','bear'];
+    function randAnimal(){ return animals[Math.floor(Math.random()*animals.length)]; }
     function updateBack(){
       document.getElementById('reason-text').innerText = today;
-      const a=randAnimal(), div=document.getElementById('animal');
-      div.className=`animal ${a}`;
-      div.innerHTML=`
+      const a = randAnimal(), el = document.getElementById('animal');
+      el.className = `animal ${a}`;
+      el.innerHTML = `
         <div class="ear left"></div>
         <div class="ear right"></div>
         ${a==='cat'?'<div class="whiskers"></div>':''}
@@ -282,8 +276,8 @@
     }
     updateBack();
 
-    // Flip
-    document.getElementById('card').addEventListener('click',()=> {
+    // Flip handler
+    document.getElementById('card').addEventListener('click', () => {
       document.getElementById('card').classList.toggle('flipped');
     });
   </script>
