@@ -26,10 +26,15 @@
     }
 
     /* Layout for prev-card-card-fav */
+    /* Replace your existing .main-container with: */
     .main-container {
-      display:flex; align-items:flex-start;
-      gap:20px; flex:1;
+    display: flex;
+    justify-content: center;   /* center horizontally */
+    align-items: center;       /* center vertically */
+    gap: 20px;
+    flex: 1;
     }
+
     .box {
       width:200px; min-height:200px;
       background:#fff; border:2px solid #ffccd5;
@@ -109,7 +114,86 @@
       border-radius:50%; top:20px; left:15px;
       box-shadow:20px 0 #000;
     }
-    /* Cat, bunny, bear CSS omitted for brevity; keep as before */
+    
+    /* ---------- CAT ---------- */
+    .animal.cat {
+    background: #ffcccb;
+    }
+    .animal.cat .ear {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: #ffcccb;
+    top: -10px;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+    .animal.cat .ear.left  { left: 5px; }
+    .animal.cat .ear.right { right: 5px; }
+    .animal.cat .whiskers {
+    position: absolute;
+    bottom: 15px;
+    width: 40px;
+    height: 2px;
+    }
+    .animal.cat .whiskers::before,
+    .animal.cat .whiskers::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 2px;
+    background: #000;
+    }
+    .animal.cat .whiskers::before { transform: rotate(10deg); }
+    .animal.cat .whiskers::after  { transform: rotate(-10deg); }
+
+    /* ---------- BUNNY ---------- */
+    .animal.bunny {
+    background: #f4f4f4;
+    }
+    .animal.bunny .ear {
+    position: absolute;
+    width: 12px;
+    height: 30px;
+    background: #f4f4f4;
+    top: -30px;
+    border-radius: 50%;
+    }
+    .animal.bunny .ear.left  { left: 10px; }
+    .animal.bunny .ear.right { right: 10px; }
+    .animal.bunny .blush {
+    position: absolute;
+    bottom: 10px;
+    left: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: pink;
+    box-shadow: 34px 0 pink;
+    }
+
+    /* ---------- BEAR ---------- */
+    .animal.bear {
+    background: #deb887;
+    }
+    .animal.bear .ear {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #deb887;
+    border-radius: 50%;
+    top: -8px;
+    }
+    .animal.bear .ear.left  { left: 8px; }
+    .animal.bear .ear.right { right: 8px; }
+    .animal.bear .nose {
+    position: absolute;
+    top: 30px;
+    left: 26px;
+    width: 10px;
+    height: 8px;
+    border-radius: 50%;
+    background: #333;
+    }
 
     #countdown {
       font-size:20px; color:#444;
