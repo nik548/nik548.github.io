@@ -7,12 +7,30 @@
   <style>
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
       font-family: Arial, sans-serif;
       background: #fff0f5;
+      overflow: hidden;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Title */
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #d6336c;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 1.2s ease forwards;
     }
 
     /* Card container */
@@ -21,6 +39,9 @@
       height: 200px;
       perspective: 1000px;
       cursor: pointer;
+      opacity: 0;
+      animation: fadeIn 1.5s ease forwards;
+      animation-delay: 0.5s;
     }
 
     .card-inner {
@@ -61,7 +82,7 @@
       position: relative;
       flex-direction: column;
       justify-content: flex-start;
-      padding-bottom: 80px; /* Extra space for animal */
+      padding-bottom: 80px; /* room for animal */
     }
 
     /* Reason text */
@@ -90,7 +111,11 @@
       50% { transform: translateY(-5px) rotate(5deg); }
     }
 
-    /* Base animal face */
+    /* ======================
+       UNIQUE ANIMAL STYLES
+       ====================== */
+
+    /* Base face */
     .animal::before {
       content: '';
       position: absolute;
@@ -100,7 +125,7 @@
       background: inherit;
     }
 
-    /* Eyes */
+    /* Eyes (default) */
     .animal::after {
       content: '';
       position: absolute;
@@ -110,53 +135,102 @@
       border-radius: 50%;
       top: 20px;
       left: 15px;
-      box-shadow: 20px 0 #000; /* Second eye */
+      box-shadow: 20px 0 #000; /* second eye */
     }
 
-    /* Nose (small oval) */
-    .animal.nose::before {
-      content: '';
-      position: absolute;
-      top: 30px;
-      left: 26px;
-      width: 8px;
-      height: 5px;
-      border-radius: 50%;
-      background: #333;
+    /* ---------- CAT ---------- */
+    .animal.cat {
+      background: #ffcccb;
     }
-
-    /* Blush (two pink dots) */
-    .animal.blush::before {
-      content: '';
+    /* Cat ears (pointy) */
+    .animal.cat .ear {
       position: absolute;
+      width: 15px;
+      height: 15px;
+      background: #ffcccb;
+      top: -10px;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+    .animal.cat .ear.left { left: 5px; }
+    .animal.cat .ear.right { right: 5px; }
+    /* Cat whiskers */
+    .animal.cat .whiskers {
+      position: absolute;
+      width: 40px;
+      height: 2px;
+      background: transparent;
       bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .animal.cat .whiskers::before,
+    .animal.cat .whiskers::after {
+      content: '';
+      width: 40px;
+      height: 2px;
+      background: #000;
+      position: absolute;
+    }
+    .animal.cat .whiskers::before { transform: rotate(10deg); }
+    .animal.cat .whiskers::after { transform: rotate(-10deg); }
+
+    /* ---------- BUNNY ---------- */
+    .animal.bunny {
+      background: #f4f4f4;
+    }
+    /* Bunny long ears */
+    .animal.bunny .ear {
+      position: absolute;
+      width: 12px;
+      height: 30px;
+      background: #f4f4f4;
+      top: -30px;
+      border-radius: 50%;
+    }
+    .animal.bunny .ear.left { left: 10px; }
+    .animal.bunny .ear.right { right: 10px; }
+
+    /* Bunny blush */
+    .animal.bunny .blush {
+      position: absolute;
+      bottom: 10px;
       left: 8px;
       width: 10px;
       height: 10px;
       border-radius: 50%;
       background: pink;
-      box-shadow: 34px 0 pink; /* Second blush */
+      box-shadow: 34px 0 pink;
     }
 
-    /* Specific animal colors + ears */
-    .animal.cat {
-      background: #ffcccb;
-    }
-    .animal.cat::before { background: #ffcccb; }
-    .animal.cat::before, .animal.cat::after {}
-
-    .animal.bunny {
-      background: #f4f4f4;
-    }
-    .animal.bunny::before { background: #f4f4f4; }
-
+    /* ---------- BEAR ---------- */
     .animal.bear {
       background: #deb887;
     }
-    .animal.bear::before { background: #deb887; }
+    /* Bear round ears */
+    .animal.bear .ear {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #deb887;
+      border-radius: 50%;
+      top: -8px;
+    }
+    .animal.bear .ear.left { left: 8px; }
+    .animal.bear .ear.right { right: 8px; }
+    /* Bear nose (bigger) */
+    .animal.bear .nose {
+      position: absolute;
+      top: 30px;
+      left: 26px;
+      width: 10px;
+      height: 8px;
+      border-radius: 50%;
+      background: #333;
+    }
   </style>
 </head>
 <body>
+  <h1>100 Reasons I Love You</h1>
   <div class="card" id="card">
     <div class="card-inner">
       <div class="card-face card-front" id="card-front"></div>
@@ -209,7 +283,16 @@
 
       const animalDiv = document.getElementById('animal');
       const randomAnimal = getRandomAnimalClass();
-      animalDiv.className = `animal ${randomAnimal} nose blush`;
+
+      // Reset animal content and add new structure
+      animalDiv.className = `animal ${randomAnimal}`;
+      animalDiv.innerHTML = `
+        <div class="ear left"></div>
+        <div class="ear right"></div>
+        ${randomAnimal === 'cat' ? '<div class="whiskers"></div>' : ''}
+        ${randomAnimal === 'bunny' ? '<div class="blush"></div>' : ''}
+        ${randomAnimal === 'bear' ? '<div class="nose"></div>' : ''}
+      `;
     }
 
     // Set today's date
@@ -227,7 +310,7 @@
     card.addEventListener('click', () => {
       card.classList.toggle('flipped');
       if (!card.classList.contains('flipped')) {
-        // When flipped back to front, prep next back content
+        // Prepare next back content when flipped again
         updateBackContent();
       }
     });
