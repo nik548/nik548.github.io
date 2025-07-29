@@ -15,9 +15,59 @@
       font-family: Arial, sans-serif;
       background: #fff0f5;
       overflow: hidden;
+      position: relative;
     }
 
-    /* Fade-in animation */
+    /* Background vines (immersive) */
+    .vine {
+      position: absolute;
+      width: 120px;
+      height: 100%;
+      background: repeating-linear-gradient(to bottom, #3c7a4d 0 12px, transparent 12px 24px);
+      opacity: 0.3;
+      animation: sway 6s ease-in-out infinite;
+      z-index: -1;
+    }
+    .vine.left {
+      left: 0;
+    }
+    .vine.right {
+      right: 0;
+      animation-direction: reverse;
+    }
+
+    /* Flowers */
+    .flower {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #ffb6c1;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: bloom 1s forwards, sway 6s ease-in-out infinite;
+      opacity: 0.8;
+    }
+
+    /* Random flower placements */
+    .flower:nth-child(1) { top: 10%; left: 20px; animation-delay: 0.2s; }
+    .flower:nth-child(2) { top: 30%; left: 40px; animation-delay: 0.4s; }
+    .flower:nth-child(3) { top: 60%; left: 25px; animation-delay: 0.6s; }
+    .flower:nth-child(4) { top: 80%; left: 50px; animation-delay: 0.8s; }
+    .flower:nth-child(5) { top: 20%; right: 20px; animation-delay: 0.3s; }
+    .flower:nth-child(6) { top: 50%; right: 40px; animation-delay: 0.5s; }
+    .flower:nth-child(7) { top: 70%; right: 25px; animation-delay: 0.7s; }
+    .flower:nth-child(8) { top: 90%; right: 45px; animation-delay: 0.9s; }
+
+    /* Animations */
+    @keyframes sway {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+    @keyframes bloom {
+      to { transform: scale(1); }
+    }
+
+    /* Fade-in for title/card */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -82,7 +132,7 @@
       position: relative;
       flex-direction: column;
       justify-content: flex-start;
-      padding-bottom: 80px; /* room for animal */
+      padding-bottom: 80px; /* space for animal */
     }
 
     /* Reason text */
@@ -105,15 +155,10 @@
       animation: dance 1s infinite ease-in-out;
     }
 
-    /* Dancing animation */
     @keyframes dance {
       0%, 100% { transform: translateY(0) rotate(-5deg); }
       50% { transform: translateY(-5px) rotate(5deg); }
     }
-
-    /* ======================
-       UNIQUE ANIMAL STYLES
-       ====================== */
 
     /* Base face */
     .animal::before {
@@ -125,7 +170,7 @@
       background: inherit;
     }
 
-    /* Eyes (default) */
+    /* Eyes */
     .animal::after {
       content: '';
       position: absolute;
@@ -135,14 +180,13 @@
       border-radius: 50%;
       top: 20px;
       left: 15px;
-      box-shadow: 20px 0 #000; /* second eye */
+      box-shadow: 20px 0 #000;
     }
 
     /* ---------- CAT ---------- */
     .animal.cat {
       background: #ffcccb;
     }
-    /* Cat ears (pointy) */
     .animal.cat .ear {
       position: absolute;
       width: 15px;
@@ -153,15 +197,12 @@
     }
     .animal.cat .ear.left { left: 5px; }
     .animal.cat .ear.right { right: 5px; }
-    /* Cat whiskers */
     .animal.cat .whiskers {
       position: absolute;
       width: 40px;
       height: 2px;
       background: transparent;
       bottom: 15px;
-      display: flex;
-      justify-content: space-between;
     }
     .animal.cat .whiskers::before,
     .animal.cat .whiskers::after {
@@ -178,7 +219,6 @@
     .animal.bunny {
       background: #f4f4f4;
     }
-    /* Bunny long ears */
     .animal.bunny .ear {
       position: absolute;
       width: 12px;
@@ -189,8 +229,6 @@
     }
     .animal.bunny .ear.left { left: 10px; }
     .animal.bunny .ear.right { right: 10px; }
-
-    /* Bunny blush */
     .animal.bunny .blush {
       position: absolute;
       bottom: 10px;
@@ -206,7 +244,6 @@
     .animal.bear {
       background: #deb887;
     }
-    /* Bear round ears */
     .animal.bear .ear {
       position: absolute;
       width: 14px;
@@ -217,7 +254,6 @@
     }
     .animal.bear .ear.left { left: 8px; }
     .animal.bear .ear.right { right: 8px; }
-    /* Bear nose (bigger) */
     .animal.bear .nose {
       position: absolute;
       top: 30px;
@@ -227,13 +263,39 @@
       border-radius: 50%;
       background: #333;
     }
+
+    /* Countdown timer */
+    #countdown {
+      position: fixed;
+      bottom: 20px;
+      font-size: 16px;
+      color: #444;
+      background: rgba(255,255,255,0.8);
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
+  <!-- Background vines and flowers -->
+  <div class="vine left"></div>
+  <div class="vine right"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+  <div class="flower"></div>
+
+  <!-- Title -->
   <h1>100 Reasons I Love You</h1>
+
+  <!-- Card -->
   <div class="card" id="card">
     <div class="card-inner">
-      <div class="card-face card-front" id="card-front"></div>
+      <div class="card-face card-front" id="card-front">Click here for today’s reason</div>
       <div class="card-face card-back" id="card-back">
         <div id="reason-text"></div>
         <div id="animal" class="animal"></div>
@@ -241,18 +303,20 @@
     </div>
   </div>
 
+  <!-- Countdown timer -->
+  <div id="countdown"></div>
+
   <script>
-    // 100 reasons
     const reasons = [
       "You always make me laugh.",
       "You’re my biggest supporter.",
       "I love how you scrunch your nose when you smile.",
       "You make even ordinary days special.",
       "You believe in me when I doubt myself.",
-      // ...continue until 100 reasons
+      // ... add until 100
     ];
 
-    // Shuffle function
+    // Shuffle reasons
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -260,7 +324,6 @@
       }
       return array;
     }
-
     let shuffledReasons = shuffle([...reasons]);
     let reasonIndex = 0;
 
@@ -272,19 +335,43 @@
       return shuffledReasons[reasonIndex++];
     }
 
-    // Random animal
+    // Daily reset logic
+    function getNextResetTimeEST() {
+      const now = new Date();
+      const estOffset = -5 * 60; // EST = UTC-5
+      const nowUtc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const nowEst = new Date(nowUtc + estOffset * 60000);
+
+      const nextReset = new Date(nowEst);
+      nextReset.setHours(7, 0, 0, 0); // 7 AM EST
+      if (nowEst >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
+
+      // Convert nextReset back to local time
+      const nextResetLocal = new Date(nextReset.getTime() - estOffset * 60000 - now.getTimezoneOffset() * 60000);
+      return nextResetLocal;
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = nextReset - now;
+      if (diff <= 0) location.reload();
+
+      const hrs = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const secs = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+      document.getElementById('countdown').textContent = `Countdown to next card: ${hrs}:${mins}:${secs}`;
+    }
+
+    // Animal logic
     const animals = ['cat', 'bunny', 'bear'];
     function getRandomAnimalClass() {
       return animals[Math.floor(Math.random() * animals.length)];
     }
-
     function updateBackContent() {
-      document.getElementById('reason-text').textContent = getNextReason();
-
+      document.getElementById('reason-text').textContent = todayReason;
       const animalDiv = document.getElementById('animal');
       const randomAnimal = getRandomAnimalClass();
-
-      // Reset animal content and add new structure
       animalDiv.className = `animal ${randomAnimal}`;
       animalDiv.innerHTML = `
         <div class="ear left"></div>
@@ -295,25 +382,31 @@
       `;
     }
 
-    // Set today's date
-    const today = new Date().toLocaleDateString('en-US', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-    document.getElementById('card-front').textContent = today;
+    // Determine today's reason (persistent until reset)
+    const nextReset = getNextResetTimeEST();
+    const storedReason = localStorage.getItem('todayReason');
+    const storedExpiry = localStorage.getItem('todayReasonExpiry');
+    let todayReason;
 
-    // Initial reason + animal
+    if (storedReason && storedExpiry && new Date(storedExpiry) > new Date()) {
+      todayReason = storedReason;
+    } else {
+      todayReason = getNextReason();
+      localStorage.setItem('todayReason', todayReason);
+      localStorage.setItem('todayReasonExpiry', nextReset);
+    }
+
+    // Initialize card content
     updateBackContent();
 
     const card = document.getElementById('card');
-
-    // Flip logic
     card.addEventListener('click', () => {
       card.classList.toggle('flipped');
-      if (!card.classList.contains('flipped')) {
-        // Prepare next back content when flipped again
-        updateBackContent();
-      }
     });
+
+    // Countdown updater
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
   </script>
 </body>
 </html>
