@@ -629,7 +629,21 @@
     const FAVORITES_KEY = 'favoriteReasons';
 
     // Placeholder reasons
-    const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
+    const reasons = [
+    "I admire your dedication because you always dig in and break down even the toughest problems until you find a solution.",
+    "I am constantly amazed by your generosity, how much you care for the people who matter to you and the lengths you go to make them happy.",
+    "You surprise me with kindness in the little moments, like being considerate to strangers and treating service staff with respect.",
+    "You make people feel seen by genuinely trying to understand how they are feeling and showing your empathy.",
+    "Your sense of humor makes me smile because you find a way to diffuse tension with a lighthearted joke even in serious situations.",
+    "Your integrity inspires me because you never take shortcuts and always stand by your principles when it is hard.",
+    "I am fascinated by the way you think as you decompose big, complicated problems into manageable steps and tackle them with clarity.",
+    "You have been selfless without being asked when you cared for me while I was sick despite being busy and spent days finding the perfect reservation for my mom.",
+    "I love that you wash your contacts exactly fifty times because it shows your conviction and how you stick to what matters even when it is tedious.",
+    "You make hard things feel manageable by validating how I feel and then gently helping me shift focus so I can breathe and move forward.",
+    // placeholders for 11–100
+    ...Array.from({ length: 90 }, (_, i) => `Placeholder reason #${i + 11}`)
+    ];
+
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
