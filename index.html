@@ -10,92 +10,245 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Poppins', sans-serif;
-      display:flex; flex-direction:column;
-      justify-content:space-between; align-items:center;
-      height:100vh; padding:20px 0;
-      background:linear-gradient(180deg,#ffe4e8 0%,#fff0f5 100%);
-      position:relative; overflow:hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg,#ffe4e8 0%,#fff0f5 100%);
+      position: relative;
+      color: #333;
+      overflow: hidden;
+      padding: 0;
     }
-    @keyframes fadeIn {
-      from {opacity:0; transform:translateY(-10px);} 
-      to {opacity:1; transform:translateY(0);}
+
+    /* Corner decorations suggestions:
+       Could instead be replaced with star clusters or ribbon banners. 
+       Implemented here: simple heart+vine flourishes with pulse. */
+    .corner {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .corner svg {
+      width: 60px;
+      height: 60px;
+      filter: drop-shadow(0 0 5px rgba(214,51,108,0.6));
+      animation: pulse 4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .corner.left { top: 10px; left: 10px; }
+    .corner.right { top: 10px; right: 10px; transform: scaleX(-1); }
+
+    /* Header/title covering top ~20% */
+    .header {
+      flex: 0 0 20%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding-top: 10px;
     }
     h1 {
-      font-size:32px; font-weight:600; color:#d6336c;
-      opacity:0; animation:fadeIn 1.2s ease forwards;
+      font-size: clamp(32px, 6vw, 64px);
+      font-weight: 700;
+      color: #d6336c;
+      text-align: center;
+      font-family: 'Dancing Script', cursive;
+      margin: 0;
+      line-height: 1;
     }
 
-    /* Layout for prev-card-card-fav */
-    /* Replace your existing .main-container with: */
-    .main-container {
-    display: flex;
-    justify-content: center;   /* center horizontally */
-    align-items: center;       /* center vertically */
-    gap: 20px;
-    flex: 1;
+    /* Main content: grid, card, favorites */
+    .content {
+      flex: 1;
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 10px 20px;
     }
 
-    .box {
-      width:200px; min-height:200px;
-      background:#fff; border:2px solid #ffccd5;
-      border-radius:12px; padding:15px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.1);
-      display:flex; flex-direction:column;
-      justify-content:center; align-items:center;
-      font-size:16px; color:#333;
+    /* Grid of 100 reasons */
+    .grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 220px;
     }
-    .box h2 {
-      font-size:18px; margin-bottom:10px; color:#d6336c;
+    .grid-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #d6336c;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      width: 220px;
+      user-select: none;
+    }
+    .grid-item {
+      aspect-ratio: 1/1;
+      background: #f0e8f2;
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 10px;
+      position: relative;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      transition: all .2s ease;
+    }
+    .grid-item.seen {
+      background: #a8e6a3;
+      color: #1f4d2f;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+    }
+    .grid-item:hover { transform: scale(1.05); }
+
+    .note-panel {
+      margin-top: 10px;
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(214,51,108,0.12);
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .note-panel textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 80px;
+      border: 1px solid #e1cfe8;
+      border-radius: 6px;
+      padding: 6px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .note-header {
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+    .note-header .reason-label {
+      font-size: 14px;
+      color: #8f3f78;
+    }
+    .note-save {
+      background: #d6336c;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      align-self: flex-end;
     }
 
-    /* Card styling */
+    /* Card area */
+    .card-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
     .card {
-      width:300px; height:200px;
-      border:4px solid #ffccd5; border-radius:15px;
-      box-shadow:0 4px 20px rgba(255,182,193,0.5);
-      background:#fff; perspective:1000px; cursor:pointer;
-      opacity:0; animation:fadeIn 1.5s ease forwards;
-      animation-delay:0.5s;
+      width: 300px;
+      height: 200px;
+      border: 4px solid #ffccd5;
+      border-radius: 15px;
+      background: #fff;
+      box-shadow: 0 6px 30px rgba(255,182,193,0.5);
+      perspective: 1000px;
+      cursor: pointer;
+      position: relative;
     }
     .card-inner {
-      width:100%; height:100%; position:relative;
-      transform-style:preserve-3d;
-      transition:transform 0.6s cubic-bezier(0.25,1.5,0.5,1);
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.25,1.5,0.5,1);
     }
-    .card.flipped .card-inner { transform:rotateY(180deg); }
-
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
     .card-face {
-      position:absolute; width:100%; height:100%;
-      backface-visibility:hidden; border-radius:11px;
-      display:flex; justify-content:center; align-items:center;
-      padding:20px;
+      position: absolute;
+      width: 100%; height: 100%;
+      backface-visibility: hidden;
+      border-radius: 11px;
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      font-size: 16px;
     }
     .card-front {
-      background:#ffccd5; color:#222;
-      font-family:'Dancing Script',cursive;
-      font-size:24px; font-weight:700; text-align:center;
-      line-height:1.2;
+      background: #ffccd5;
+      color: #222;
+      font-family: 'Dancing Script', cursive;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .card-back {
-      background:#ffe4e1; transform:rotateY(180deg);
-      flex-direction:column; justify-content:flex-start;
-      padding-bottom:80px; position:relative;
+      background: #ffe4e1;
+      transform: rotateY(180deg);
+      position: relative;
+      padding-bottom: 60px;
+    }
+
+    /* Reason number on back */
+    .reason-number {
+      font-weight: 600;
+      font-size: 14px;
+      color: #8f3f78;
+      margin-bottom: 6px;
+      text-align: center;
     }
 
     #reason-text {
-      max-width:240px; text-align:center; margin-top:30px;
-      font-size:18px; color:#333;
+      max-width: 240px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+      color: #3a2a3a;
+      margin: 0 auto;
     }
 
-    /* Heart icon */
+    /* Heart icon for favorites */
     .heart {
-      position:absolute; top:12px; right:12px;
-      font-size:24px; color:#ccc; cursor:pointer;
-      transition:color 0.3s;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 26px;
+      cursor: pointer;
+      transition: color .25s;
+      color: #ccc;
+      user-select: none;
     }
-    .heart.hearted { color:#e63946; }
+    .heart.hearted { color: #e63946; }
 
-    /* Animal unchanged */
+    /* Animal (bottom right) */
     .animal {
       position:absolute; bottom:10px; right:10px;
       width:60px; height:60px;
@@ -105,240 +258,464 @@
       0%,100%{transform:translateY(0) rotate(-5deg);}
       50%{transform:translateY(-5px) rotate(5deg);}
     }
-    .animal::before { content:''; position:absolute;
+    .animal::before {
+      content:''; position:absolute;
       width:60px; height:60px; border-radius:50%;
       background:inherit;
     }
-    .animal::after { content:''; position:absolute;
+    .animal::after {
+      content:''; position:absolute;
       width:8px; height:8px; background:#000;
       border-radius:50%; top:20px; left:15px;
       box-shadow:20px 0 #000;
     }
-    
-    /* ---------- CAT ---------- */
-    .animal.cat {
-    background: #ffcccb;
-    }
+    /* Cat */
+    .animal.cat { background:#ffcccb; }
     .animal.cat .ear {
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    background: #ffcccb;
-    top: -10px;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      position:absolute; width:15px; height:15px; background:#ffcccb;
+      top:-10px; clip-path:polygon(50% 0%,0% 100%,100% 100%);
     }
-    .animal.cat .ear.left  { left: 5px; }
-    .animal.cat .ear.right { right: 5px; }
+    .animal.cat .ear.left { left:5px; }
+    .animal.cat .ear.right { right:5px; }
     .animal.cat .whiskers {
-    position: absolute;
-    bottom: 15px;
-    width: 40px;
-    height: 2px;
+      position:absolute; bottom:15px; width:40px; height:2px;
     }
     .animal.cat .whiskers::before,
     .animal.cat .whiskers::after {
-    content: '';
-    position: absolute;
-    width: 40px;
-    height: 2px;
-    background: #000;
+      content:''; position:absolute; width:40px; height:2px; background:#000;
     }
-    .animal.cat .whiskers::before { transform: rotate(10deg); }
-    .animal.cat .whiskers::after  { transform: rotate(-10deg); }
+    .animal.cat .whiskers::before { transform:rotate(10deg); }
+    .animal.cat .whiskers::after  { transform:rotate(-10deg); }
 
-    /* ---------- BUNNY ---------- */
-    .animal.bunny {
-    background: #f4f4f4;
-    }
+    /* Bunny */
+    .animal.bunny { background:#f4f4f4; }
     .animal.bunny .ear {
-    position: absolute;
-    width: 12px;
-    height: 30px;
-    background: #f4f4f4;
-    top: -30px;
-    border-radius: 50%;
+      position:absolute; width:12px; height:30px; background:#f4f4f4;
+      top:-30px; border-radius:50%;
     }
-    .animal.bunny .ear.left  { left: 10px; }
-    .animal.bunny .ear.right { right: 10px; }
+    .animal.bunny .ear.left { left:10px; }
+    .animal.bunny .ear.right { right:10px; }
     .animal.bunny .blush {
-    position: absolute;
-    bottom: 10px;
-    left: 8px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: pink;
-    box-shadow: 34px 0 pink;
+      position:absolute; bottom:10px; left:8px;
+      width:10px; height:10px; border-radius:50%;
+      background:pink; box-shadow:34px 0 pink;
     }
 
-    /* ---------- BEAR ---------- */
-    .animal.bear {
-    background: #deb887;
-    }
+    /* Bear */
+    .animal.bear { background:#deb887; }
     .animal.bear .ear {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: #deb887;
-    border-radius: 50%;
-    top: -8px;
+      position:absolute; width:14px; height:14px; background:#deb887;
+      top:-8px; border-radius:50%;
     }
-    .animal.bear .ear.left  { left: 8px; }
-    .animal.bear .ear.right { right: 8px; }
+    .animal.bear .ear.left { left:8px; }
+    .animal.bear .ear.right { right:8px; }
     .animal.bear .nose {
-    position: absolute;
-    top: 30px;
-    left: 26px;
-    width: 10px;
-    height: 8px;
-    border-radius: 50%;
-    background: #333;
+      position:absolute; top:30px; left:26px;
+      width:10px; height:8px; border-radius:50%; background:#333;
     }
 
+    /* Favorites leaderboard */
+    .favorites {
+      min-width:220px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .favorites h2 {
+      font-size:18px; margin:0; font-weight:600; color:#d6336c; text-align:center;
+    }
+    .fav-list {
+      background:#fff;
+      border:2px solid #ffccd5;
+      border-radius:12px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      box-shadow:0 4px 16px rgba(214,51,108,0.08);
+    }
+    .fav-item {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 8px;
+      background:#fdf4f9;
+      border-radius:8px;
+      position: relative;
+      font-size:14px;
+    }
+    .fav-rank {
+      font-weight:700;
+      width:20px;
+      text-align:center;
+      color:#d6336c;
+    }
+    .fav-text {
+      flex:1;
+      overflow:hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .fav-controls {
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .fav-controls button {
+      background:none;
+      border:none;
+      cursor:pointer;
+      padding:2px;
+      font-size:14px;
+      line-height:1;
+      color:#8f3f78;
+    }
+    .fav-controls button:hover { color:#d6336c; }
+    .remove-fav {
+      position:absolute;
+      top:4px; right:4px;
+      background: transparent;
+      border:none;
+      cursor:pointer;
+      font-size:14px;
+      color:#999;
+    }
+
+    /* Countdown */
     #countdown {
-      font-size:20px; color:#444;
-      background:rgba(255,255,255,0.9);
-      padding:8px 12px; border-radius:8px;
-      margin-top:20px;
+      font-size:20px;
+      text-align:center;
+      background: rgba(255,255,255,0.9);
+      padding:10px 14px;
+      border-radius:10px;
+      margin: 0 auto 10px;
+      max-width: 400px;
+      align-self: center;
+      font-weight:500;
+      color:#444;
+    }
+
+    /* Responsive shrink */
+    @media (max-width: 1100px) {
+      .content { flex-direction: column; align-items: center; }
+      .grid-container, .favorites { order: 1; }
+      .card-wrapper { order: 2; margin: 0 auto; }
     }
   </style>
 </head>
 <body>
-  <h1>100 Reasons I Love You</h1>
+  <!-- Corner decorations -->
+  <div class="corner left">
+    <!-- Simple heart+vine SVG -->
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 58s-26-15.5-26-34c0-9.4 7.6-17 17-17 6.9 0 12.9 4 15 9.7C40.1 11 46.1 7 53 7c9.4 0 17 7.6 17 17 0 18.5-26 34-26 34z" fill="none" stroke="#d6336c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="corner right">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 58s-26-15.5-26-34c0-9.4 7.6-17 17-17 6.9 0 12.9 4 15 9.7C40.1 11 46.1 7 53 7c9.4 0 17 7.6 17 17 0 18.5-26 34-26 34z" fill="none" stroke="#d6336c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
 
-  <div class="main-container">
-    <!-- Previous Reason Box -->
-    <div class="box" id="prev-box">
-      <h2>Previous</h2>
-      <div id="prev-reason">—</div>
+  <!-- Header -->
+  <div class="header">
+    <h1>100 Reasons I Love You</h1>
+  </div>
+
+  <!-- Main content -->
+  <div class="content">
+    <!-- Grid + note -->
+    <div class="grid-container">
+      <div class="grid-title">Seen Reasons</div>
+      <div class="grid" id="grid"></div>
+      <div id="note-wrapper"></div>
     </div>
 
-    <!-- Flip Card -->
-    <div class="card" id="card">
-      <div class="card-inner">
-        <div class="card-face card-front" id="card-front">
-          Click here for today’s reason
-        </div>
-        <div class="card-face card-back" id="card-back">
-          <div class="heart" id="heart">❤</div>
-          <div id="reason-text"></div>
-          <div id="animal" class="animal"></div>
+    <!-- Card -->
+    <div class="card-wrapper">
+      <div class="card" id="card">
+        <div class="card-inner">
+          <div class="card-face card-front" id="card-front">
+            Click here for today’s reason
+          </div>
+          <div class="card-face card-back" id="card-back">
+            <div class="heart" id="heart">❤</div>
+            <div class="reason-number" id="reason-number">Reason #--</div>
+            <div id="reason-text"></div>
+            <div id="animal" class="animal"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Favorite Reason Box -->
-    <div class="box" id="fav-box">
-      <h2>Favorite</h2>
-      <div id="fav-reason">—</div>
+    <!-- Favorites -->
+    <div class="favorites">
+      <h2>Favorites</h2>
+      <div class="fav-list" id="fav-list">
+        <!-- Favorite items injected here -->
+      </div>
     </div>
   </div>
 
+  <!-- Countdown -->
   <div id="countdown"></div>
 
   <script>
-    // List of reasons (fill to 100)
-    const reasons = [
-      "You always make me laugh.", "You’re my biggest supporter.",
-      "I love how you scrunch your nose when you smile.",
-      "You make even ordinary days special.",
-      "You believe in me when I doubt myself.",
-      // ...continue to 100
-    ];
+    // === Data and persistence keys ===
+    const NUM_REASONS = 100;
+    const SHUFFLED_ORDER_KEY = 'shuffledOrder';
+    const SHUFFLED_PTR_KEY = 'shuffledPointer';
+    const TODAY_IDX_KEY = 'todayReasonIndex';
+    const EXPIRY_KEY = 'todayReasonExpiry';
+    const SEEN_KEY = 'seenReasons';
+    const FAVORITES_KEY = 'favoriteReasons';
+    const NOTES_KEY = 'reasonNotes';
 
-    // Shuffle helper
-    function shuffle(a) {
-      for (let i = a.length-1; i>0; i--) {
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i], a[j]] = [a[j], a[i]];
+    // Placeholder reasons (fill to 100)
+    const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`); // replace with real reasons
+
+    // Utilities
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
-      return a;
+      return array;
     }
 
-    let list = shuffle([...reasons]), idx = 0;
-    function nextReason(){
-      if(idx >= list.length) {
-        list = shuffle([...reasons]); idx = 0;
+    function getNextResetTimeEST() {
+      const now = new Date();
+      const estOffset = -5 * 60; // EST = UTC-5 in minutes
+      const nowUtc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const nowEst = new Date(nowUtc + estOffset * 60000);
+      const nextReset = new Date(nowEst);
+      nextReset.setHours(7, 0, 0, 0);
+      if (nowEst >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
+      // convert back to local
+      return new Date(nextReset.getTime() - estOffset * 60000 - now.getTimezoneOffset() * 60000);
+    }
+
+    // === State Loading / Initialization ===
+    let shuffledOrder = JSON.parse(localStorage.getItem(SHUFFLED_ORDER_KEY) || 'null');
+    let shuffledPtr = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
+    if (!shuffledOrder || !Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
+      shuffledOrder = shuffle([...Array(NUM_REASONS).keys()]);
+      shuffledPtr = 0;
+      localStorage.setItem(SHUFFLED_ORDER_KEY, JSON.stringify(shuffledOrder));
+      localStorage.setItem(SHUFFLED_PTR_KEY, shuffledPtr);
+    }
+
+    let todayIndex;
+    const storedIdx = parseInt(localStorage.getItem(TODAY_IDX_KEY), 10);
+    const storedExpiry = localStorage.getItem(EXPIRY_KEY);
+    const nextReset = getNextResetTimeEST();
+    const seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
+    let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); // array of indices
+    let notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
+
+    const now = new Date();
+    if (!isNaN(storedIdx) && storedExpiry && new Date(storedExpiry) > now) {
+      todayIndex = storedIdx;
+    } else {
+      // advance pointer if needed
+      if (shuffledPtr >= NUM_REASONS) shuffledPtr = 0;
+      todayIndex = shuffledOrder[shuffledPtr];
+      shuffledPtr += 1;
+      localStorage.setItem(SHUFFLED_PTR_KEY, shuffledPtr);
+      localStorage.setItem(TODAY_IDX_KEY, todayIndex);
+      localStorage.setItem(EXPIRY_KEY, nextReset);
+      // update seen
+      seen.add(todayIndex);
+      localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
+    }
+
+    // Always ensure current reason in seen
+    if (!seen.has(todayIndex)) {
+      seen.add(todayIndex);
+      localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
+    }
+
+    // === DOM Elements ===
+    const gridEl = document.getElementById('grid');
+    const noteWrapper = document.getElementById('note-wrapper');
+    const reasonTextEl = document.getElementById('reason-text');
+    const reasonNumberEl = document.getElementById('reason-number');
+    const cardEl = document.getElementById('card');
+    const heartEl = document.getElementById('heart');
+    const favListEl = document.getElementById('fav-list');
+    const countdownEl = document.getElementById('countdown');
+
+    // === Rendering functions ===
+    function renderGrid() {
+      gridEl.innerHTML = '';
+      for (let i = 0; i < NUM_REASONS; i++) {
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+        item.dataset.index = i;
+        item.textContent = i + 1;
+        if (seen.has(i)) item.classList.add('seen');
+        item.addEventListener('click', () => openNotePanel(i));
+        gridEl.appendChild(item);
       }
-      return list[idx++];
     }
 
-    // Compute reset at 7am EST
-    function getNextReset(){
-      const now = new Date(),
-            off = now.getTimezoneOffset() + 5*60,
-            nowEst = new Date(now.getTime()+off*60000);
-      let reset = new Date(nowEst);
-      reset.setHours(7,0,0,0);
-      if(nowEst >= reset) reset.setDate(reset.getDate()+1);
-      return new Date(reset.getTime() - off*60000 - now.getTimezoneOffset()*60000);
-    }
-    const nextReset = getNextReset();
-
-    // Countdown update
-    function updateCountdown(){
-      const diff = nextReset - new Date();
-      if(diff <=0) return location.reload();
-      const h = String(Math.floor(diff/3600000)).padStart(2,'0'),
-            m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0'),
-            s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-      document.getElementById('countdown').innerText =
-        `Countdown to next card: ${h}:${m}:${s}`;
-    }
-    setInterval(updateCountdown,1000); updateCountdown();
-
-    // Load stored reasons
-    let stored = localStorage.getItem('todayReason'),
-        exp    = localStorage.getItem('expiry'),
-        prev   = localStorage.getItem('prevReason'),
-        fav    = localStorage.getItem('favoriteReason'),
-        isValid= stored && new Date(exp)>new Date();
-
-    let today = isValid ? stored : nextReason();
-
-    // If a new day, shift previous
-    if(!isValid){
-      if(stored) localStorage.setItem('prevReason', stored);
-      prev = stored || '—';
-      localStorage.setItem('todayReason', today);
-      localStorage.setItem('expiry', nextReset);
+    function openNotePanel(idx) {
+      noteWrapper.innerHTML = '';
+      const panel = document.createElement('div');
+      panel.className = 'note-panel';
+      const header = document.createElement('div');
+      header.className = 'note-header';
+      const label = document.createElement('div');
+      label.className = 'reason-label';
+      label.textContent = `Note for Reason #${idx+1}`;
+      header.appendChild(label);
+      const textarea = document.createElement('textarea');
+      textarea.value = notes[idx] || '';
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'note-save';
+      saveBtn.textContent = 'Save';
+      saveBtn.addEventListener('click', () => {
+        notes[idx] = textarea.value;
+        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+        saveBtn.textContent = 'Saved';
+        setTimeout(() => { saveBtn.textContent = 'Save'; }, 1000);
+      });
+      panel.appendChild(header);
+      panel.appendChild(textarea);
+      panel.appendChild(saveBtn);
+      noteWrapper.appendChild(panel);
     }
 
-    document.getElementById('prev-reason').innerText = prev || '—';
-    document.getElementById('fav-reason').innerText = fav || '—';
-
-    // Update back content
-    function updateBack(){
-      document.getElementById('reason-text').innerText = today;
-      const a = ['cat','bunny','bear'][Math.floor(Math.random()*3)],
-            el = document.getElementById('animal');
-      el.className = `animal ${a}`;
-      el.innerHTML = `
-        <div class="ear left"></div><div class="ear right"></div>
-        ${a==='cat'?'<div class="whiskers"></div>':''}
-        ${a==='bunny'?'<div class="blush"></div>':''}
-        ${a==='bear'?'<div class="nose"></div>':''}
+    function updateCardBack() {
+      reasonTextEl.textContent = reasons[todayIndex];
+      reasonNumberEl.textContent = `Reason #${todayIndex + 1}`;
+      // animal
+      const animalEl = document.getElementById('animal');
+      const animals = ['cat', 'bunny', 'bear'];
+      const choice = animals[Math.floor(Math.random() * animals.length)];
+      animalEl.className = `animal ${choice}`;
+      animalEl.innerHTML = `
+        <div class="ear left"></div>
+        <div class="ear right"></div>
+        ${choice === 'cat' ? '<div class="whiskers"></div>' : ''}
+        ${choice === 'bunny' ? '<div class="blush"></div>' : ''}
+        ${choice === 'bear' ? '<div class="nose"></div>' : ''}
       `;
-      // Heart highlight if today's is favorite
-      const heart = document.getElementById('heart');
-      if(fav === today) heart.classList.add('hearted');
-      else heart.classList.remove('hearted');
+      // heart highlight
+      if (favorites.includes(todayIndex)) {
+        heartEl.classList.add('hearted');
+      } else {
+        heartEl.classList.remove('hearted');
+      }
     }
-    updateBack();
 
-    // Heart click → favorite
-    document.getElementById('heart').addEventListener('click', e => {
+    function renderFavorites() {
+      favListEl.innerHTML = '';
+      favorites.slice(0,5).forEach((idx, position) => {
+        const item = document.createElement('div');
+        item.className = 'fav-item';
+        const rank = document.createElement('div');
+        rank.className = 'fav-rank';
+        rank.textContent = position + 1;
+        const text = document.createElement('div');
+        text.className = 'fav-text';
+        text.textContent = reasons[idx];
+        const controls = document.createElement('div');
+        controls.className = 'fav-controls';
+        const up = document.createElement('button');
+        up.innerHTML = '▲';
+        up.title = 'Move up';
+        up.disabled = position === 0;
+        up.addEventListener('click', () => {
+          if (position > 0) {
+            [favorites[position - 1], favorites[position]] = [favorites[position], favorites[position - 1]];
+            persistFavorites();
+            renderFavorites();
+          }
+        });
+        const down = document.createElement('button');
+        down.innerHTML = '▼';
+        down.title = 'Move down';
+        down.disabled = position === favorites.length -1;
+        down.addEventListener('click', () => {
+          if (position < favorites.length -1) {
+            [favorites[position + 1], favorites[position]] = [favorites[position], favorites[position + 1]];
+            persistFavorites();
+            renderFavorites();
+          }
+        });
+        controls.appendChild(up);
+        controls.appendChild(down);
+        // remove button
+        const remove = document.createElement('button');
+        remove.className = 'remove-fav';
+        remove.innerHTML = '×';
+        remove.title = 'Remove';
+        remove.addEventListener('click', () => {
+          favorites = favorites.filter(f => f !== idx);
+          persistFavorites();
+          renderFavorites();
+          updateCardBack();
+        });
+
+        item.appendChild(rank);
+        item.appendChild(text);
+        item.appendChild(controls);
+        item.appendChild(remove);
+        favListEl.appendChild(item);
+      });
+    }
+
+    function persistFavorites() {
+      favorites = Array.from(new Set(favorites)).slice(0,5);
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = nextReset - now;
+      if (diff <= 0) location.reload();
+      const hh = String(Math.floor(diff / 3600000)).padStart(2,'0');
+      const mm = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+      const ss = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+      countdownEl.textContent = `Countdown to next card: ${hh}:${mm}:${ss}`;
+    }
+
+    // === Event wiring ===
+    // Flip card
+    cardEl.addEventListener('click', () => {
+      cardEl.classList.toggle('flipped');
+    });
+
+    // Heart toggles favorite
+    heartEl.addEventListener('click', (e) => {
       e.stopPropagation();
-      fav = today;
-      localStorage.setItem('favoriteReason', fav);
-      document.getElementById('fav-reason').innerText = fav;
-      document.getElementById('heart').classList.add('hearted');
+      const idx = todayIndex;
+      const existing = favorites.indexOf(idx);
+      if (existing !== -1) {
+        // remove
+        favorites.splice(existing,1);
+      } else {
+        if (favorites.length >= 5) {
+          alert('You can only favorite up to 5 reasons. Remove one first.');
+          return;
+        }
+        favorites.push(idx);
+      }
+      persistFavorites();
+      renderFavorites();
+      updateCardBack();
     });
 
-    // Flip card on click
-    document.getElementById('card').addEventListener('click', ()=>{
-      document.getElementById('card').classList.toggle('flipped');
-    });
+    // === Initial render ===
+    renderGrid();
+    updateCardBack();
+    renderFavorites();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Optional: open note for today's reason by default
+    openNotePanel(todayIndex);
   </script>
 </body>
 </html>
