@@ -18,6 +18,32 @@
       overflow: hidden;
     }
 
+    /* Debug panel */
+    #debug-ui {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #fff5fa;
+      border: 1px solid #d6336c;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 1100;
+      width: 220px;
+      box-shadow: 0 8px 30px rgba(214,51,108,0.2);
+    }
+    #debug-ui button {
+      font-size: 11px;
+      margin: 2px 2px 4px 0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #d6336c;
+      background: white;
+      cursor: pointer;
+    }
+    #debug-ui button:hover { background: #ffe4f0; }
+    #debug-ui label { display: flex; align-items: center; gap:4px; }
+
     /* Corner decorations */
     .corner {
       position: absolute;
@@ -466,6 +492,23 @@
   </style>
 </head>
 <body>
+  <!-- Debug UI -->
+  <div id="debug-ui">
+    <label><input type="checkbox" id="debug-toggle"> Debug mode</label>
+    <div style="margin-top:6px; font-size:11px;">
+      <div>Simulated date: <span id="debug-current-date"></span></div>
+      <div>Offset days: <span id="debug-offset">0</span></div>
+    </div>
+    <div id="debug-controls" style="margin-top:6px; display:none;">
+      <button id="advance-day">+1 day</button>
+      <button id="rewind-day">-1 day</button>
+      <button id="reset-offset">Reset</button>
+      <button id="force-new">Force new reason</button>
+      <button id="clear-streak">Clear streak</button>
+    </div>
+    <div style="margin-top:4px; font-size:10px; color:#666;">Turn off debug to resume real-time behavior.</div>
+  </div>
+
   <div class="corner left">
     <svg viewBox="0 0 64 64" aria-hidden="true">
       <path d="M32 58s-26-15.5-26-34c0-9.4 7.6-17 17-17 6.9 0 12.9 4 15 9.7C40.1 11 46.1 7 53 7c9.4 0 17 7.6 17 17 0 18.5-26 34-26 34z" fill="none" stroke="#d6336c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -542,6 +585,26 @@
   <div id="countdown"></div>
 
   <script>
+    // === Debug switchable time logic ===
+    let DEBUG_MODE = localStorage.getItem('debugMode') === 'true';
+    let DEBUG_DAY_OFFSET = parseInt(localStorage.getItem('debugDayOffset') || '0', 10);
+
+    function getNow() {
+      const d = new Date();
+      if (DEBUG_MODE && DEBUG_DAY_OFFSET) {
+        d.setDate(d.getDate() + DEBUG_DAY_OFFSET);
+      }
+      return d;
+    }
+
+    function updateDebugPanel() {
+      document.getElementById('debug-offset').textContent = DEBUG_DAY_OFFSET;
+      document.getElementById('debug-current-date').textContent = getNow().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+      const toggle = document.getElementById('debug-toggle');
+      toggle.checked = DEBUG_MODE;
+      document.getElementById('debug-controls').style.display = DEBUG_MODE ? 'block' : 'none';
+    }
+
     // === Keys & constants ===
     const NUM_REASONS = 100;
     const SHUFFLED_ORDER_KEY = 'shuffledOrder';
@@ -564,7 +627,7 @@
     }
 
     function getNextResetTimeEST() {
-      const now = new Date();
+      const now = getNow();
       const estOffset = -5 * 60;
       const nowUtc = now.getTime() + now.getTimezoneOffset() * 60000;
       const nowEst = new Date(nowUtc + estOffset * 60000);
@@ -591,7 +654,7 @@
     let seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
     let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
 
-    const now = new Date();
+    const now = getNow();
     if (!isNaN(storedIdx) && storedExpiry && new Date(storedExpiry) > now) {
       todayIndex = storedIdx;
     } else {
@@ -691,8 +754,8 @@
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
     function updateStreakUI() {
-      const todayKey = getLocalDateKey(new Date());
-      const yesterday = new Date();
+      const todayKey = getLocalDateKey(getNow());
+      const yesterday = new Date(getNow());
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayKey = getLocalDateKey(yesterday);
 
@@ -840,8 +903,8 @@
     }
 
     function updateCountdown() {
-      const now = new Date();
-      const diff = nextReset - now;
+      const nowLocal = getNow();
+      const diff = nextReset - nowLocal;
       if (diff <= 0) location.reload();
       const hh = String(Math.floor(diff / 3600000)).padStart(2,'0');
       const mm = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
@@ -871,14 +934,52 @@
       updateCardBack();
     });
 
+    // === Debug UI wiring ===
+    document.getElementById('debug-toggle').addEventListener('change', e => {
+      DEBUG_MODE = e.target.checked;
+      localStorage.setItem('debugMode', DEBUG_MODE.toString());
+      updateDebugPanel();
+    });
+    document.getElementById('advance-day').addEventListener('click', () => {
+      DEBUG_DAY_OFFSET += 1;
+      localStorage.setItem('debugDayOffset', DEBUG_DAY_OFFSET.toString());
+      updateDebugPanel();
+      location.reload();
+    });
+    document.getElementById('rewind-day').addEventListener('click', () => {
+      DEBUG_DAY_OFFSET -= 1;
+      localStorage.setItem('debugDayOffset', DEBUG_DAY_OFFSET.toString());
+      updateDebugPanel();
+      location.reload();
+    });
+    document.getElementById('reset-offset').addEventListener('click', () => {
+      DEBUG_DAY_OFFSET = 0;
+      localStorage.setItem('debugDayOffset', '0');
+      updateDebugPanel();
+      location.reload();
+    });
+    document.getElementById('force-new').addEventListener('click', () => {
+      localStorage.setItem(EXPIRY_KEY, new Date(getNow().getTime() - 1000).toString());
+      location.reload();
+    });
+    document.getElementById('clear-streak').addEventListener('click', () => {
+      localStorage.removeItem('loveStreakLastVisit');
+      localStorage.removeItem('loveStreakCount');
+      updateStreakUI();
+    });
+
     // === Init ===
+    updateDebugPanel();
     renderGrid();
     updateCardBack();
     renderFavorites();
     updateStreakUI();
     updateCountdown();
-    setInterval(updateCountdown, 1000);
-    // do NOT auto-open preview; it appears only on first click of a seen square
+    setInterval(() => {
+      updateCountdown();
+      updateDebugPanel();
+    }, 1000);
+    // preview appears only via interaction
   </script>
 </body>
 </html>
