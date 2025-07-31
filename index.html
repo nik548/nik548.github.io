@@ -31,6 +31,7 @@
       z-index: 1100;
       width: 240px;
       box-shadow: 0 8px 30px rgba(214,51,108,0.2);
+      display: none; /* hidden by default; toggled with shortcut */
     }
     #debug-ui button {
       font-size: 11px;
@@ -401,31 +402,6 @@
       transition: width .4s ease;
     }
 
-    /* Growing since decorative line */
-    .growth-note {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #6b4f70;
-      font-style: italic;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .growth-note .seedling {
-      display: inline-block;
-      transform: translateY(1px);
-    }
-
-    /* Plant container */
-    #plant-wrapper {
-      margin-top: 6px;
-      display: flex;
-      justify-content: center;
-    }
-    .plant-svg rect, .plant-svg circle {
-      transition: all .4s ease;
-    }
-
     /* Favorites leaderboard */
     .favorites {
       flex: 1;
@@ -532,7 +508,7 @@
       <button id="clear-streak">Clear streak</button>
       <button id="full-reset">Full reset</button>
     </div>
-    <div style="margin-top:4px; font-size:10px; color:#666;">Turn off debug to resume real-time behavior.</div>
+    <div style="margin-top:4px; font-size:10px; color:#666;">Use ⌘+Shift+D (or Ctrl+Shift+D) to toggle panel.</div>
   </div>
 
   <div class="corner left">
@@ -588,13 +564,6 @@
               </div>
             </div>
           </div>
-          <div class="growth-note" id="growth-note">
-            <span class="seedling">🌱</span>
-            <div>Growing since <span id="start-date-text"></span></div>
-          </div>
-          <div id="plant-wrapper">
-            <!-- plant injected -->
-          </div>
         </div>
       </div>
       <div class="favorites">
@@ -621,6 +590,7 @@
     // === Debug time logic ===
     let DEBUG_MODE = localStorage.getItem('debugMode') === 'true';
     let DEBUG_DAY_OFFSET = parseInt(localStorage.getItem('debugDayOffset') || '0', 10);
+    let debugPanelVisible = false;
 
     function getNow() {
       const d = new Date();
@@ -638,6 +608,16 @@
       document.getElementById('debug-controls').style.display = DEBUG_MODE ? 'block' : 'none';
     }
 
+    // toggle debug panel via Cmd/Ctrl+Shift+D
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'd') {
+        debugPanelVisible = !debugPanelVisible;
+        const ui = document.getElementById('debug-ui');
+        ui.style.display = debugPanelVisible ? 'block' : 'none';
+        updateDebugPanel();
+      }
+    });
+
     // === Keys & constants ===
     const NUM_REASONS = 100;
     const MAX_FAVORITES = 10;
@@ -647,8 +627,6 @@
     const EXPIRY_KEY = 'todayReasonExpiry';
     const SEEN_KEY = 'seenReasons';
     const FAVORITES_KEY = 'favoriteReasons';
-    const START_DATE_KEY = 'startDate';
-    const FULL_GROWTH_DAYS = 100; // now grows linearly to day 100
 
     // Placeholder reasons
     const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
@@ -672,7 +650,7 @@
       return new Date(nextReset.getTime() - estOffset * 60000 - now.getTimezoneOffset() * 60000);
     }
 
-    // === State ===
+    // === State initialization ===
     let shuffledOrder = JSON.parse(localStorage.getItem(SHUFFLED_ORDER_KEY) || 'null');
     let shuffledPtr = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
     if (!shuffledOrder || !Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
@@ -688,14 +666,6 @@
     const storedExpiry = localStorage.getItem(EXPIRY_KEY);
     let seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
     let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
-
-    // start date for growth
-    let startDateStr = localStorage.getItem(START_DATE_KEY);
-    if (!startDateStr) {
-      startDateStr = getNow().toISOString();
-      localStorage.setItem(START_DATE_KEY, startDateStr);
-    }
-    const startDate = new Date(startDateStr);
 
     const now = getNow();
     if (!isNaN(storedIdx) && storedExpiry && new Date(storedExpiry) > now) {
@@ -726,9 +696,8 @@
     const heartEl = document.getElementById('heart');
     const favListEl = document.getElementById('fav-list');
     const countdownEl = document.getElementById('countdown');
-    const startDateTextEl = document.getElementById('start-date-text');
-    const plantWrapper = document.getElementById('plant-wrapper');
 
+    // Track which preview is open
     let currentPreview = null;
 
     // === Confetti ===
@@ -836,51 +805,6 @@
       document.getElementById('seen-progress').style.width = `${pct}%`;
 
       document.getElementById('streak-box').classList.add('visible');
-
-      // update plant growth
-      updatePlant(newStreak);
-    }
-
-    // === Plant growth simplified ===
-    function updatePlant(streak) {
-      const progress = Math.min(1, streak / FULL_GROWTH_DAYS);
-      if (streak === 0) {
-        plantWrapper.innerHTML = `
-          <svg class="plant-svg" viewBox="0 0 60 60" aria-label="Seedling">
-            <circle cx="30" cy="50" r="5" fill="#a67c52" />
-            <circle cx="27" cy="45" r="3" fill="#6BAE55" />
-            <circle cx="33" cy="45" r="3" fill="#6BAE55" />
-          </svg>`;
-        return;
-      }
-      if (!document.getElementById('plant-svg')) {
-        plantWrapper.innerHTML = `
-          <svg id="plant-svg" class="plant-svg" viewBox="0 0 120 100" aria-label="Growing tree">
-            <g id="plant">
-              <rect id="trunk" x="55" y="80" width="10" height="10" rx="3" fill="#8B5A2B"/>
-              <circle id="canopy" cx="60" cy="65" r="12" fill="#6BAE55" />
-            </g>
-          </svg>`;
-      }
-      // normalized growth
-      const normalized = Math.min(1, streak / FULL_GROWTH_DAYS);
-      // trunk height from 10 to 60
-      const minTrunk = 10;
-      const maxTrunk = 60;
-      const trunkHeight = minTrunk + (maxTrunk - minTrunk) * normalized;
-      const trunkEl = document.getElementById('trunk');
-      const trunkY = 80 - trunkHeight;
-      trunkEl.setAttribute('height', trunkHeight);
-      trunkEl.setAttribute('y', trunkY);
-      // canopy radius from 12 to 35
-      const minCanopy = 12;
-      const maxCanopy = 35;
-      const canopyRadius = minCanopy + (maxCanopy - minCanopy) * normalized;
-      const canopyEl = document.getElementById('canopy');
-      // position canopy slightly above trunk with small overlap
-      const canopyCy = trunkY - canopyRadius * 0.2;
-      canopyEl.setAttribute('r', canopyRadius);
-      canopyEl.setAttribute('cy', canopyCy);
     }
 
     // === Rendering ===
@@ -1026,7 +950,7 @@
       updateCardBack();
     });
 
-    // === Debug wiring ===
+    // === Debug UI wiring ===
     document.getElementById('debug-toggle').addEventListener('change', e => {
       DEBUG_MODE = e.target.checked;
       localStorage.setItem('debugMode', DEBUG_MODE.toString());
@@ -1068,7 +992,6 @@
       const pct = Math.min(100, Math.round((seenCount / NUM_REASONS) * 100));
       document.getElementById('seen-progress').style.width = `${pct}%`;
       document.getElementById('streak-box').classList.add('visible');
-      updatePlant(0);
     });
     document.getElementById('full-reset').addEventListener('click', () => {
       localStorage.removeItem('loveStreakLastVisit');
@@ -1079,7 +1002,6 @@
       localStorage.removeItem(SHUFFLED_PTR_KEY);
       localStorage.removeItem(TODAY_IDX_KEY);
       localStorage.removeItem(EXPIRY_KEY);
-      localStorage.setItem(START_DATE_KEY, getNow().toISOString());
       location.reload();
     });
 
@@ -1090,7 +1012,6 @@
     renderFavorites();
     updateStreakUI();
     updateCountdown();
-    startDateTextEl.textContent = startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     setInterval(() => {
       updateCountdown();
       updateDebugPanel();
