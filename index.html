@@ -21,7 +21,7 @@
     /* Debug panel */
     #debug-ui {
       position: fixed;
-      top: 10px;
+      bottom: 10px;
       right: 10px;
       background: #fff5fa;
       border: 1px solid #d6336c;
@@ -565,7 +565,7 @@
         </div>
       </div>
       <div class="favorites">
-        <h2>Favorites</h2>
+        <h2>Favorites (max 10)</h2>
         <div class="fav-list" id="fav-list"></div>
       </div>
     </div>
@@ -607,6 +607,7 @@
 
     // === Keys & constants ===
     const NUM_REASONS = 100;
+    const MAX_FAVORITES = 10;
     const SHUFFLED_ORDER_KEY = 'shuffledOrder';
     const SHUFFLED_PTR_KEY = 'shuffledPointer';
     const TODAY_IDX_KEY = 'todayReasonIndex';
@@ -808,7 +809,6 @@
 
     function togglePreview(idx) {
       if (currentPreview === idx) {
-        // hide
         currentPreview = null;
         previewEl.classList.remove('visible');
         setTimeout(() => {
@@ -843,7 +843,7 @@
 
     function renderFavorites() {
       favListEl.innerHTML = '';
-      favorites.slice(0,5).forEach((idx, position) => {
+      favorites.slice(0, MAX_FAVORITES).forEach((idx, position) => {
         const item = document.createElement('div');
         item.className = 'fav-item';
         const rank = document.createElement('div');
@@ -898,7 +898,7 @@
     }
 
     function persistFavorites() {
-      favorites = Array.from(new Set(favorites)).slice(0,5);
+      favorites = Array.from(new Set(favorites)).slice(0, MAX_FAVORITES);
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
     }
 
@@ -923,8 +923,8 @@
       if (existing !== -1) {
         favorites.splice(existing,1);
       } else {
-        if (favorites.length >= 5) {
-          alert('You can only favorite up to 5 reasons. Remove one first.');
+        if (favorites.length >= MAX_FAVORITES) {
+          alert(`You can only favorite up to ${MAX_FAVORITES} reasons. Remove one first.`);
           return;
         }
         favorites.push(idx);
@@ -938,6 +938,10 @@
     document.getElementById('debug-toggle').addEventListener('change', e => {
       DEBUG_MODE = e.target.checked;
       localStorage.setItem('debugMode', DEBUG_MODE.toString());
+      if (!DEBUG_MODE) {
+        DEBUG_DAY_OFFSET = 0;
+        localStorage.setItem('debugDayOffset', '0');
+      }
       updateDebugPanel();
     });
     document.getElementById('advance-day').addEventListener('click', () => {
@@ -964,8 +968,15 @@
     });
     document.getElementById('clear-streak').addEventListener('click', () => {
       localStorage.removeItem('loveStreakLastVisit');
-      localStorage.removeItem('loveStreakCount');
-      updateStreakUI();
+      localStorage.setItem('loveStreakCount', '0');
+      // immediate UI reflect
+      document.getElementById('love-streak-count').textContent = '0';
+      document.getElementById('streak-s-plural').textContent = 's';
+      const seenCount = typeof seen !== 'undefined' ? seen.size : 0;
+      document.getElementById('seen-count').textContent = seenCount;
+      const pct = Math.min(100, Math.round((seenCount / NUM_REASONS) * 100));
+      document.getElementById('seen-progress').style.width = `${pct}%`;
+      document.getElementById('streak-box').classList.add('visible');
     });
 
     // === Init ===
