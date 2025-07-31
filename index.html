@@ -29,7 +29,7 @@
       border-radius: 8px;
       font-size: 12px;
       z-index: 1100;
-      width: 220px;
+      width: 240px;
       box-shadow: 0 8px 30px rgba(214,51,108,0.2);
     }
     #debug-ui button {
@@ -401,6 +401,21 @@
       transition: width .4s ease;
     }
 
+    /* Growing since decorative line */
+    .growth-note {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6b4f70;
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .growth-note .seedling {
+      display: inline-block;
+      transform: translateY(1px);
+    }
+
     /* Favorites leaderboard */
     .favorites {
       flex: 1;
@@ -505,6 +520,7 @@
       <button id="reset-offset">Reset</button>
       <button id="force-new">Force new reason</button>
       <button id="clear-streak">Clear streak</button>
+      <button id="full-reset">Full reset</button>
     </div>
     <div style="margin-top:4px; font-size:10px; color:#666;">Turn off debug to resume real-time behavior.</div>
   </div>
@@ -562,6 +578,10 @@
               </div>
             </div>
           </div>
+          <div class="growth-note" id="growth-note">
+            <span class="seedling">🌱</span>
+            <div>Growing since <span id="start-date-text"></span></div>
+          </div>
         </div>
       </div>
       <div class="favorites">
@@ -614,6 +634,7 @@
     const EXPIRY_KEY = 'todayReasonExpiry';
     const SEEN_KEY = 'seenReasons';
     const FAVORITES_KEY = 'favoriteReasons';
+    const START_DATE_KEY = 'startDate';
 
     // Placeholder reasons (replace later)
     const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
@@ -655,6 +676,14 @@
     let seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
     let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
 
+    // start date (for growing since)
+    let startDateStr = localStorage.getItem(START_DATE_KEY);
+    if (!startDateStr) {
+      startDateStr = getNow().toISOString();
+      localStorage.setItem(START_DATE_KEY, startDateStr);
+    }
+    const startDate = new Date(startDateStr);
+
     const now = getNow();
     if (!isNaN(storedIdx) && storedExpiry && new Date(storedExpiry) > now) {
       todayIndex = storedIdx;
@@ -684,6 +713,7 @@
     const heartEl = document.getElementById('heart');
     const favListEl = document.getElementById('fav-list');
     const countdownEl = document.getElementById('countdown');
+    const startDateTextEl = document.getElementById('start-date-text');
 
     // Track which preview is open
     let currentPreview = null;
@@ -764,8 +794,13 @@
       const storedStreak = parseInt(localStorage.getItem('loveStreakCount') || '0', 10);
       let newStreak = storedStreak;
 
-      if (lastKey === todayKey) {
-        // no change
+      if (!lastKey && storedStreak === 0) {
+        // day-zero initial after full reset: keep 0 but initialize last visit
+        newStreak = 0;
+        localStorage.setItem('loveStreakLastVisit', todayKey);
+        localStorage.setItem('loveStreakCount', '0');
+      } else if (lastKey === todayKey) {
+        // same day: no change
       } else {
         if (lastKey === yesterdayKey) {
           newStreak = storedStreak + 1;
@@ -978,6 +1013,20 @@
       document.getElementById('seen-progress').style.width = `${pct}%`;
       document.getElementById('streak-box').classList.add('visible');
     });
+    document.getElementById('full-reset').addEventListener('click', () => {
+      // wipe everything relevant: streak, seen, favorites, ordering, today reason, expiry, start date
+      localStorage.removeItem('loveStreakLastVisit');
+      localStorage.setItem('loveStreakCount', '0');
+      localStorage.removeItem(FAVORITES_KEY);
+      localStorage.removeItem(SEEN_KEY);
+      localStorage.removeItem(SHUFFLED_ORDER_KEY);
+      localStorage.removeItem(SHUFFLED_PTR_KEY);
+      localStorage.removeItem(TODAY_IDX_KEY);
+      localStorage.removeItem(EXPIRY_KEY);
+      localStorage.setItem(START_DATE_KEY, getNow().toISOString());
+      // reload fresh
+      location.reload();
+    });
 
     // === Init ===
     updateDebugPanel();
@@ -986,6 +1035,8 @@
     renderFavorites();
     updateStreakUI();
     updateCountdown();
+    // set growing since
+    startDateTextEl.textContent = startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     setInterval(() => {
       updateCountdown();
       updateDebugPanel();
