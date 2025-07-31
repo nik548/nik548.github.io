@@ -118,7 +118,7 @@
     }
     .grid-item.seen:hover { transform: scale(1.05); }
 
-    /* Preview box bottom-left */
+    /* Preview at bottom-left */
     .preview {
       grid-area: preview;
       display: flex;
@@ -126,6 +126,7 @@
       align-items: flex-start;
       padding: 10px 0 0 0;
       overflow: hidden;
+      position: relative;
     }
     .preview-box {
       background: #fff;
@@ -138,6 +139,15 @@
       gap: 20px;
       flex-direction: column;
       justify-content: flex-start;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .25s ease, transform .25s ease;
+      pointer-events: none;
+    }
+    .preview.visible .preview-box {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
     .preview-title {
       font-weight: 600;
@@ -168,7 +178,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       min-width: 340px;
       justify-content: center;
     }
@@ -239,6 +249,7 @@
       color:#3a2a3a;
       margin:0 auto;
     }
+
     .heart {
       position:absolute;
       top:10px;
@@ -311,6 +322,57 @@
     .animal.bear .nose {
       position:absolute; top:30px; left:26px;
       width:10px; height:8px; border-radius:50%; background:#333;
+    }
+
+    /* Streak / progress box */
+    .streak-box {
+      margin-top: 6px;
+      background: #fff;
+      padding: 14px 18px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(214,51,108,0.08);
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .3s ease, transform .3s ease;
+    }
+    .streak-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .streak-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .streak-label {
+      color: #d6336c;
+      font-weight: 600;
+      min-width: 80px;
+    }
+    .progress-bar {
+      background: #f0e8f2;
+      border-radius: 8px;
+      width: 120px;
+      height: 10px;
+      margin-top: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: #a8e6a3;
+      height: 100%;
+      width: 0%;
+      border-radius: 8px 0 0 8px;
+      transition: width .4s ease;
     }
 
     /* Favorites leaderboard */
@@ -427,7 +489,7 @@
       <div class="grid" id="grid"></div>
     </div>
 
-    <!-- Right: card + favorites -->
+    <!-- Right: card + favorites + streak -->
     <div class="right-area">
       <div class="card-wrapper">
         <div class="card" id="card">
@@ -443,6 +505,21 @@
             </div>
           </div>
         </div>
+        <div class="streak-box" id="streak-box">
+          <div class="streak-row">
+            <div class="streak-label">💖 Love streak:</div>
+            <div><strong><span id="love-streak-count">0</span> day<span id="streak-s-plural">s</span></strong></div>
+          </div>
+          <div class="streak-row">
+            <div class="streak-label">👀 Seen:</div>
+            <div>
+              <strong><span id="seen-count">0</span>/100</strong>
+              <div class="progress-bar">
+                <div class="progress-fill" id="seen-progress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="favorites">
         <h2>Favorites</h2>
@@ -454,8 +531,8 @@
     <div class="preview" id="preview">
       <div class="preview-box">
         <div class="preview-section">
-          <div class="preview-title" id="preview-title">Click a seen square</div>
-          <div class="preview-content" id="preview-content">Reason will appear here.</div>
+          <div class="preview-title" id="preview-title"></div>
+          <div class="preview-content" id="preview-content"></div>
         </div>
       </div>
     </div>
@@ -474,9 +551,10 @@
     const SEEN_KEY = 'seenReasons';
     const FAVORITES_KEY = 'favoriteReasons';
 
-    // Placeholder reasons
+    // Placeholder reasons (replace later)
     const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
 
+    // Shuffle helper
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -496,7 +574,7 @@
       return new Date(nextReset.getTime() - estOffset * 60000 - now.getTimezoneOffset() * 60000);
     }
 
-    // === State ===
+    // === State initialization ===
     let shuffledOrder = JSON.parse(localStorage.getItem(SHUFFLED_ORDER_KEY) || 'null');
     let shuffledPtr = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
     if (!shuffledOrder || !Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
@@ -533,6 +611,7 @@
 
     // === DOM refs ===
     const gridEl = document.getElementById('grid');
+    const previewEl = document.getElementById('preview');
     const previewTitle = document.getElementById('preview-title');
     const previewContent = document.getElementById('preview-content');
     const reasonTextEl = document.getElementById('reason-text');
@@ -542,9 +621,113 @@
     const favListEl = document.getElementById('fav-list');
     const countdownEl = document.getElementById('countdown');
 
+    // Track which preview is open
     let currentPreview = null;
 
-    // === Renderers ===
+    // === Confetti ===
+    function launchConfetti() {
+      const colors = ['#ffb3c1', '#ffccd5', '#d6336c', '#ffe4e8', '#f8c8e0'];
+      const count = 40;
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.pointerEvents = 'none';
+      container.style.overflow = 'visible';
+      container.style.zIndex = 1000;
+      document.body.appendChild(container);
+
+      const originX = window.innerWidth / 2;
+      const originY = window.innerHeight / 3;
+
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        const size = 6 + Math.random() * 8;
+        piece.style.width = `${size}px`;
+        piece.style.height = `${size * 0.6}px`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.position = 'absolute';
+        piece.style.top = `${originY}px`;
+        piece.style.left = `${originX}px`;
+        piece.style.borderRadius = '3px';
+        piece.style.opacity = '1';
+        piece.style.transformOrigin = 'center';
+        container.appendChild(piece);
+
+        const deltaX = (Math.random() - 0.5) * 200;
+        const deltaY = 150 + Math.random() * 100;
+        const rotateStart = Math.random() * 360;
+        const rotateEnd = rotateStart + (Math.random() > 0.5 ? 360 : -360);
+        const duration = 1200 + Math.random() * 600;
+
+        piece.animate([
+          {
+            transform: `translate(0px, 0px) rotate(${rotateStart}deg) scale(1)`,
+            opacity: 1
+          },
+          {
+            transform: `translate(${deltaX}px, ${deltaY}px) rotate(${rotateEnd}deg) scale(0.8)`,
+            opacity: 0
+          }
+        ], {
+          duration: duration,
+          easing: 'cubic-bezier(0.25,0.46,0.45,0.94)',
+          fill: 'forwards'
+        });
+
+        setTimeout(() => {
+          piece.remove();
+        }, duration + 100);
+      }
+      setTimeout(() => {
+        container.remove();
+      }, 2200);
+    }
+
+    // --- Streak logic ---
+    function getLocalDateKey(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function updateStreakUI() {
+      const todayKey = getLocalDateKey(new Date());
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayKey = getLocalDateKey(yesterday);
+
+      const lastKey = localStorage.getItem('loveStreakLastVisit');
+      const storedStreak = parseInt(localStorage.getItem('loveStreakCount') || '0', 10);
+      let newStreak = storedStreak;
+
+      if (lastKey === todayKey) {
+        // no change
+      } else {
+        if (lastKey === yesterdayKey) {
+          newStreak = storedStreak + 1;
+        } else {
+          newStreak = 1;
+        }
+        localStorage.setItem('loveStreakCount', newStreak);
+        localStorage.setItem('loveStreakLastVisit', todayKey);
+      }
+
+      if (newStreak !== storedStreak && newStreak > 0 && newStreak % 10 === 0) {
+        launchConfetti();
+      }
+
+      document.getElementById('love-streak-count').textContent = newStreak;
+      document.getElementById('streak-s-plural').textContent = newStreak === 1 ? '' : 's';
+
+      const seenCount = typeof seen !== 'undefined' ? seen.size : 0;
+      document.getElementById('seen-count').textContent = seenCount;
+      const pct = Math.min(100, Math.round((seenCount / NUM_REASONS) * 100));
+      document.getElementById('seen-progress').style.width = `${pct}%`;
+
+      document.getElementById('streak-box').classList.add('visible');
+    }
+
+    // === Rendering ===
     function renderGrid() {
       gridEl.innerHTML = '';
       for (let i = 0; i < NUM_REASONS; i++) {
@@ -563,13 +746,17 @@
     function togglePreview(idx) {
       if (currentPreview === idx) {
         // hide
-        previewTitle.textContent = 'Click a seen square';
-        previewContent.textContent = 'Reason will appear here.';
         currentPreview = null;
+        previewEl.classList.remove('visible');
+        setTimeout(() => {
+          previewTitle.textContent = '';
+          previewContent.textContent = '';
+        }, 250);
       } else {
         currentPreview = idx;
         previewTitle.textContent = `Reason #${idx+1}`;
         previewContent.textContent = reasons[idx];
+        previewEl.classList.add('visible');
       }
     }
 
@@ -688,10 +875,10 @@
     renderGrid();
     updateCardBack();
     renderFavorites();
+    updateStreakUI();
     updateCountdown();
     setInterval(updateCountdown, 1000);
-    // default preview is today's reason if seen
-    togglePreview(todayIndex);
+    // do NOT auto-open preview; it appears only on first click of a seen square
   </script>
 </body>
 </html>
