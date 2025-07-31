@@ -17,12 +17,9 @@
       position: relative;
       color: #333;
       overflow: hidden;
-      padding: 0;
     }
 
-    /* Corner decorations suggestions:
-       Could instead be replaced with star clusters or ribbon banners. 
-       Implemented here: simple heart+vine flourishes with pulse. */
+    /* Corner decorations */
     .corner {
       position: absolute;
       width: 80px;
@@ -44,14 +41,13 @@
     .corner.left { top: 10px; left: 10px; }
     .corner.right { top: 10px; right: 10px; transform: scaleX(-1); }
 
-    /* Header/title covering top ~20% */
+    /* Header (top ~20%) */
     .header {
       flex: 0 0 20%;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
-      padding-top: 10px;
+      padding: 10px 20px;
     }
     h1 {
       font-size: clamp(32px, 6vw, 64px);
@@ -69,16 +65,18 @@
       display: flex;
       gap: 30px;
       justify-content: center;
-      align-items: flex-start;
+      align-items: stretch; /* stretch vertically so children fill */
       padding: 10px 20px;
     }
 
-    /* Grid of 100 reasons */
+    /* Grid of seen reasons */
     .grid-container {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      min-width: 220px;
+      flex: 1;
+      min-width: 240px;
+      max-width: 260px;
     }
     .grid-title {
       font-weight: 600;
@@ -90,7 +88,7 @@
       display: grid;
       grid-template-columns: repeat(10, 1fr);
       gap: 4px;
-      width: 220px;
+      width: 100%;
       user-select: none;
     }
     .grid-item {
@@ -120,7 +118,7 @@
       padding: 12px 14px;
       border-radius: 10px;
       box-shadow: 0 6px 20px rgba(214,51,108,0.12);
-      width: 220px;
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -159,15 +157,17 @@
 
     /* Card area */
     .card-wrapper {
-      position: relative;
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      min-width: 320px;
+      justify-content: center;
     }
     .card {
-      width: 300px;
-      height: 200px;
+      width: 320px;
+      height: 220px;
       border: 4px solid #ffccd5;
       border-radius: 15px;
       background: #fff;
@@ -202,7 +202,7 @@
       background: #ffccd5;
       color: #222;
       font-family: 'Dancing Script', cursive;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
       text-align: center;
       line-height: 1.1;
@@ -217,7 +217,6 @@
       padding-bottom: 60px;
     }
 
-    /* Reason number on back */
     .reason-number {
       font-weight: 600;
       font-size: 14px;
@@ -227,7 +226,7 @@
     }
 
     #reason-text {
-      max-width: 240px;
+      max-width: 260px;
       text-align: center;
       font-size: 18px;
       font-weight: 500;
@@ -235,7 +234,7 @@
       margin: 0 auto;
     }
 
-    /* Heart icon for favorites */
+    /* Heart icon */
     .heart {
       position: absolute;
       top: 10px;
@@ -248,7 +247,7 @@
     }
     .heart.hearted { color: #e63946; }
 
-    /* Animal (bottom right) */
+    /* Animal */
     .animal {
       position:absolute; bottom:10px; right:10px;
       width:60px; height:60px;
@@ -269,7 +268,6 @@
       border-radius:50%; top:20px; left:15px;
       box-shadow:20px 0 #000;
     }
-    /* Cat */
     .animal.cat { background:#ffcccb; }
     .animal.cat .ear {
       position:absolute; width:15px; height:15px; background:#ffcccb;
@@ -287,7 +285,6 @@
     .animal.cat .whiskers::before { transform:rotate(10deg); }
     .animal.cat .whiskers::after  { transform:rotate(-10deg); }
 
-    /* Bunny */
     .animal.bunny { background:#f4f4f4; }
     .animal.bunny .ear {
       position:absolute; width:12px; height:30px; background:#f4f4f4;
@@ -301,7 +298,6 @@
       background:pink; box-shadow:34px 0 pink;
     }
 
-    /* Bear */
     .animal.bear { background:#deb887; }
     .animal.bear .ear {
       position:absolute; width:14px; height:14px; background:#deb887;
@@ -316,7 +312,8 @@
 
     /* Favorites leaderboard */
     .favorites {
-      min-width:220px;
+      flex: 1;
+      min-width: 220px;
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -333,6 +330,8 @@
       flex-direction:column;
       gap:8px;
       box-shadow:0 4px 16px rgba(214,51,108,0.08);
+      flex:1;
+      overflow:auto;
     }
     .fav-item {
       display:flex;
@@ -389,24 +388,22 @@
       padding:10px 14px;
       border-radius:10px;
       margin: 0 auto 10px;
-      max-width: 400px;
+      max-width: 600px;
       align-self: center;
       font-weight:500;
       color:#444;
     }
 
-    /* Responsive shrink */
     @media (max-width: 1100px) {
-      .content { flex-direction: column; align-items: center; }
-      .grid-container, .favorites { order: 1; }
-      .card-wrapper { order: 2; margin: 0 auto; }
+      .content { flex-direction: column; align-items: stretch; }
+      .grid-container, .favorites, .card-wrapper { width: 100%; }
+      .card { margin: 0 auto; }
     }
   </style>
 </head>
 <body>
   <!-- Corner decorations -->
   <div class="corner left">
-    <!-- Simple heart+vine SVG -->
     <svg viewBox="0 0 64 64" aria-hidden="true">
       <path d="M32 58s-26-15.5-26-34c0-9.4 7.6-17 17-17 6.9 0 12.9 4 15 9.7C40.1 11 46.1 7 53 7c9.4 0 17 7.6 17 17 0 18.5-26 34-26 34z" fill="none" stroke="#d6336c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
@@ -451,9 +448,7 @@
     <!-- Favorites -->
     <div class="favorites">
       <h2>Favorites</h2>
-      <div class="fav-list" id="fav-list">
-        <!-- Favorite items injected here -->
-      </div>
+      <div class="fav-list" id="fav-list"></div>
     </div>
   </div>
 
@@ -461,7 +456,7 @@
   <div id="countdown"></div>
 
   <script>
-    // === Data and persistence keys ===
+    // === Keys & constants ===
     const NUM_REASONS = 100;
     const SHUFFLED_ORDER_KEY = 'shuffledOrder';
     const SHUFFLED_PTR_KEY = 'shuffledPointer';
@@ -471,10 +466,10 @@
     const FAVORITES_KEY = 'favoriteReasons';
     const NOTES_KEY = 'reasonNotes';
 
-    // Placeholder reasons (fill to 100)
-    const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`); // replace with real reasons
+    // Replace these placeholder strings with real reasons later
+    const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
 
-    // Utilities
+    // Helpers
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -482,20 +477,18 @@
       }
       return array;
     }
-
     function getNextResetTimeEST() {
       const now = new Date();
-      const estOffset = -5 * 60; // EST = UTC-5 in minutes
+      const estOffset = -5 * 60; // minutes
       const nowUtc = now.getTime() + now.getTimezoneOffset() * 60000;
       const nowEst = new Date(nowUtc + estOffset * 60000);
       const nextReset = new Date(nowEst);
-      nextReset.setHours(7, 0, 0, 0);
-      if (nowEst >= nextReset) nextReset.setDate(nextReset.getDate() + 1);
-      // convert back to local
+      nextReset.setHours(7,0,0,0);
+      if (nowEst >= nextReset) nextReset.setDate(nextReset.getDate()+1);
       return new Date(nextReset.getTime() - estOffset * 60000 - now.getTimezoneOffset() * 60000);
     }
 
-    // === State Loading / Initialization ===
+    // === State ===
     let shuffledOrder = JSON.parse(localStorage.getItem(SHUFFLED_ORDER_KEY) || 'null');
     let shuffledPtr = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
     if (!shuffledOrder || !Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
@@ -505,37 +498,33 @@
       localStorage.setItem(SHUFFLED_PTR_KEY, shuffledPtr);
     }
 
+    const nextReset = getNextResetTimeEST();
     let todayIndex;
     const storedIdx = parseInt(localStorage.getItem(TODAY_IDX_KEY), 10);
     const storedExpiry = localStorage.getItem(EXPIRY_KEY);
-    const nextReset = getNextResetTimeEST();
-    const seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
-    let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); // array of indices
+    let seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
+    let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
     let notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
 
     const now = new Date();
     if (!isNaN(storedIdx) && storedExpiry && new Date(storedExpiry) > now) {
       todayIndex = storedIdx;
     } else {
-      // advance pointer if needed
       if (shuffledPtr >= NUM_REASONS) shuffledPtr = 0;
       todayIndex = shuffledOrder[shuffledPtr];
       shuffledPtr += 1;
       localStorage.setItem(SHUFFLED_PTR_KEY, shuffledPtr);
       localStorage.setItem(TODAY_IDX_KEY, todayIndex);
       localStorage.setItem(EXPIRY_KEY, nextReset);
-      // update seen
       seen.add(todayIndex);
       localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
     }
-
-    // Always ensure current reason in seen
     if (!seen.has(todayIndex)) {
       seen.add(todayIndex);
       localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
     }
 
-    // === DOM Elements ===
+    // === DOM refs ===
     const gridEl = document.getElementById('grid');
     const noteWrapper = document.getElementById('note-wrapper');
     const reasonTextEl = document.getElementById('reason-text');
@@ -545,7 +534,7 @@
     const favListEl = document.getElementById('fav-list');
     const countdownEl = document.getElementById('countdown');
 
-    // === Rendering functions ===
+    // === Renderers ===
     function renderGrid() {
       gridEl.innerHTML = '';
       for (let i = 0; i < NUM_REASONS; i++) {
@@ -589,10 +578,9 @@
     function updateCardBack() {
       reasonTextEl.textContent = reasons[todayIndex];
       reasonNumberEl.textContent = `Reason #${todayIndex + 1}`;
-      // animal
       const animalEl = document.getElementById('animal');
-      const animals = ['cat', 'bunny', 'bear'];
-      const choice = animals[Math.floor(Math.random() * animals.length)];
+      const animalsArr = ['cat','bunny','bear'];
+      const choice = animalsArr[Math.floor(Math.random()*animalsArr.length)];
       animalEl.className = `animal ${choice}`;
       animalEl.innerHTML = `
         <div class="ear left"></div>
@@ -601,12 +589,8 @@
         ${choice === 'bunny' ? '<div class="blush"></div>' : ''}
         ${choice === 'bear' ? '<div class="nose"></div>' : ''}
       `;
-      // heart highlight
-      if (favorites.includes(todayIndex)) {
-        heartEl.classList.add('hearted');
-      } else {
-        heartEl.classList.remove('hearted');
-      }
+      if (favorites.includes(todayIndex)) heartEl.classList.add('hearted');
+      else heartEl.classList.remove('hearted');
     }
 
     function renderFavorites() {
@@ -646,7 +630,6 @@
         });
         controls.appendChild(up);
         controls.appendChild(down);
-        // remove button
         const remove = document.createElement('button');
         remove.className = 'remove-fav';
         remove.innerHTML = '×';
@@ -681,19 +664,16 @@
       countdownEl.textContent = `Countdown to next card: ${hh}:${mm}:${ss}`;
     }
 
-    // === Event wiring ===
-    // Flip card
+    // === Interactions ===
     cardEl.addEventListener('click', () => {
       cardEl.classList.toggle('flipped');
     });
 
-    // Heart toggles favorite
-    heartEl.addEventListener('click', (e) => {
+    heartEl.addEventListener('click', e => {
       e.stopPropagation();
       const idx = todayIndex;
       const existing = favorites.indexOf(idx);
       if (existing !== -1) {
-        // remove
         favorites.splice(existing,1);
       } else {
         if (favorites.length >= 5) {
@@ -707,14 +687,13 @@
       updateCardBack();
     });
 
-    // === Initial render ===
+    // === Init ===
     renderGrid();
     updateCardBack();
     renderFavorites();
     updateCountdown();
     setInterval(updateCountdown, 1000);
-
-    // Optional: open note for today's reason by default
+    // Show today's note by default
     openNotePanel(todayIndex);
   </script>
 </body>
