@@ -416,6 +416,16 @@
       transform: translateY(1px);
     }
 
+    /* Plant container */
+    #plant-wrapper {
+      margin-top: 6px;
+      display: flex;
+      justify-content: center;
+    }
+    .plant-svg rect, .plant-svg circle {
+      transition: all .4s ease;
+    }
+
     /* Favorites leaderboard */
     .favorites {
       flex: 1;
@@ -582,6 +592,9 @@
             <span class="seedling">🌱</span>
             <div>Growing since <span id="start-date-text"></span></div>
           </div>
+          <div id="plant-wrapper">
+            <!-- JS will inject the growing plant here -->
+          </div>
         </div>
       </div>
       <div class="favorites">
@@ -605,7 +618,7 @@
   <div id="countdown"></div>
 
   <script>
-    // === Debug switchable time logic ===
+    // === Debug time logic ===
     let DEBUG_MODE = localStorage.getItem('debugMode') === 'true';
     let DEBUG_DAY_OFFSET = parseInt(localStorage.getItem('debugDayOffset') || '0', 10);
 
@@ -635,11 +648,11 @@
     const SEEN_KEY = 'seenReasons';
     const FAVORITES_KEY = 'favoriteReasons';
     const START_DATE_KEY = 'startDate';
+    const FULL_GROWTH_DAYS = 30; // days until full tree
 
-    // Placeholder reasons (replace later)
+    // Placeholder reasons
     const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
 
-    // Shuffle helper
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -659,7 +672,7 @@
       return new Date(nextReset.getTime() - estOffset * 60000 - now.getTimezoneOffset() * 60000);
     }
 
-    // === State initialization ===
+    // === State ===
     let shuffledOrder = JSON.parse(localStorage.getItem(SHUFFLED_ORDER_KEY) || 'null');
     let shuffledPtr = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
     if (!shuffledOrder || !Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
@@ -676,7 +689,7 @@
     let seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
     let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
 
-    // start date (for growing since)
+    // start date for growth
     let startDateStr = localStorage.getItem(START_DATE_KEY);
     if (!startDateStr) {
       startDateStr = getNow().toISOString();
@@ -714,8 +727,8 @@
     const favListEl = document.getElementById('fav-list');
     const countdownEl = document.getElementById('countdown');
     const startDateTextEl = document.getElementById('start-date-text');
+    const plantWrapper = document.getElementById('plant-wrapper');
 
-    // Track which preview is open
     let currentPreview = null;
 
     // === Confetti ===
@@ -824,6 +837,66 @@
       document.getElementById('seen-progress').style.width = `${pct}%`;
 
       document.getElementById('streak-box').classList.add('visible');
+
+      // update plant growth
+      updatePlant(newStreak);
+    }
+
+    // === Plant growth ===
+    function updatePlant(streak) {
+      const progress = Math.min(1, streak / FULL_GROWTH_DAYS);
+      // seed stage
+      if (streak === 0) {
+        plantWrapper.innerHTML = `
+          <svg class="plant-svg" viewBox="0 0 60 60" aria-label="Seedling">
+            <circle cx="30" cy="50" r="5" fill="#a67c52" />
+            <circle cx="27" cy="45" r="3" fill="#6BAE55" />
+            <circle cx="33" cy="45" r="3" fill="#6BAE55" />
+          </svg>`;
+        return;
+      }
+      // tree stage
+      if (!document.getElementById('plant-svg')) {
+        plantWrapper.innerHTML = `
+          <svg id="plant-svg" class="plant-svg" viewBox="0 0 120 100" aria-label="Growing tree">
+            <g id="plant">
+              <rect id="trunk" x="55" y="80" width="10" height="10" rx="3" fill="#8B5A2B"/>
+              <circle id="canopy" cx="60" cy="65" r="12" fill="#6BAE55" />
+              <!-- extra leaves -->
+              <circle class="extra-leaf" cx="45" cy="55" r="6" fill="#7bc66b" opacity="0"/>
+              <circle class="extra-leaf" cx="75" cy="55" r="6" fill="#7bc66b" opacity="0"/>
+              <circle class="extra-leaf" cx="60" cy="45" r="6" fill="#7bc66b" opacity="0"/>
+            </g>
+          </svg>`;
+      }
+      // recompute (in case)
+      const normalized = Math.min(1, streak / FULL_GROWTH_DAYS);
+      // trunk grows: from height 10 to 40, y adjusts so bottom stays
+      const minTrunk = 10;
+      const maxTrunk = 40;
+      const trunkHeight = minTrunk + (maxTrunk - minTrunk) * normalized;
+      const trunkEl = document.getElementById('trunk');
+      const trunkY = 80 - trunkHeight;
+      trunkEl.setAttribute('height', trunkHeight);
+      trunkEl.setAttribute('y', trunkY);
+      // canopy radius from 12 to 30
+      const minCanopy = 12;
+      const maxCanopy = 30;
+      const canopyRadius = minCanopy + (maxCanopy - minCanopy) * normalized;
+      const canopyEl = document.getElementById('canopy');
+      canopyEl.setAttribute('r', canopyRadius);
+      // position canopy above trunk
+      const canopyCy = trunkY - canopyRadius * 0.2;
+      canopyEl.setAttribute('cy', canopyCy);
+      // extra leaves appear progressively
+      const leaves = document.querySelectorAll('.extra-leaf');
+      leaves.forEach((leaf, i) => {
+        let targetOpacity = 0;
+        if (i === 0 && normalized > 0.3) targetOpacity = 1;
+        if (i === 1 && normalized > 0.6) targetOpacity = 1;
+        if (i === 2 && normalized > 0.9) targetOpacity = 1;
+        leaf.setAttribute('opacity', targetOpacity);
+      });
     }
 
     // === Rendering ===
@@ -969,7 +1042,7 @@
       updateCardBack();
     });
 
-    // === Debug UI wiring ===
+    // === Debug wiring ===
     document.getElementById('debug-toggle').addEventListener('change', e => {
       DEBUG_MODE = e.target.checked;
       localStorage.setItem('debugMode', DEBUG_MODE.toString());
@@ -1004,7 +1077,6 @@
     document.getElementById('clear-streak').addEventListener('click', () => {
       localStorage.removeItem('loveStreakLastVisit');
       localStorage.setItem('loveStreakCount', '0');
-      // immediate UI reflect
       document.getElementById('love-streak-count').textContent = '0';
       document.getElementById('streak-s-plural').textContent = 's';
       const seenCount = typeof seen !== 'undefined' ? seen.size : 0;
@@ -1012,9 +1084,9 @@
       const pct = Math.min(100, Math.round((seenCount / NUM_REASONS) * 100));
       document.getElementById('seen-progress').style.width = `${pct}%`;
       document.getElementById('streak-box').classList.add('visible');
+      updatePlant(0);
     });
     document.getElementById('full-reset').addEventListener('click', () => {
-      // wipe everything relevant: streak, seen, favorites, ordering, today reason, expiry, start date
       localStorage.removeItem('loveStreakLastVisit');
       localStorage.setItem('loveStreakCount', '0');
       localStorage.removeItem(FAVORITES_KEY);
@@ -1024,7 +1096,6 @@
       localStorage.removeItem(TODAY_IDX_KEY);
       localStorage.removeItem(EXPIRY_KEY);
       localStorage.setItem(START_DATE_KEY, getNow().toISOString());
-      // reload fresh
       location.reload();
     });
 
@@ -1035,13 +1106,11 @@
     renderFavorites();
     updateStreakUI();
     updateCountdown();
-    // set growing since
     startDateTextEl.textContent = startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     setInterval(() => {
       updateCountdown();
       updateDebugPanel();
     }, 1000);
-    // preview appears only via interaction
   </script>
 </body>
 </html>
