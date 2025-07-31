@@ -41,7 +41,7 @@
     .corner.left { top: 10px; left: 10px; }
     .corner.right { top: 10px; right: 10px; transform: scaleX(-1); }
 
-    /* Page grid */
+    /* Page grid layout */
     .page {
       flex: 1;
       display: grid;
@@ -50,7 +50,7 @@
       grid-template-areas:
         "header header"
         "grid right"
-        "preview preview";
+        "preview right";
       gap: 20px;
       padding: 10px 20px;
       overflow: hidden;
@@ -74,7 +74,7 @@
       line-height: 1;
     }
 
-    /* Grid (seen reasons) */
+    /* Grid of seen reasons */
     .grid-container {
       grid-area: grid;
       display: flex;
@@ -104,7 +104,7 @@
       justify-content: center;
       align-items: center;
       font-size: 10px;
-      cursor: pointer;
+      cursor: default;
       font-weight: 600;
       color: #666;
       transition: transform .2s ease;
@@ -114,16 +114,17 @@
       background: #a8e6a3;
       color: #1f4d2f;
       box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+      cursor: pointer;
     }
-    .grid-item:hover { transform: scale(1.05); }
+    .grid-item.seen:hover { transform: scale(1.05); }
 
-    /* Preview at bottom 25% */
+    /* Preview box bottom-left */
     .preview {
       grid-area: preview;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: flex-start;
-      padding: 10px 20px;
+      padding: 10px 0 0 0;
       overflow: hidden;
     }
     .preview-box {
@@ -132,22 +133,17 @@
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(214,51,108,0.12);
       width: 100%;
-      max-width: 1100px;
+      height: 100%;
       display: flex;
       gap: 20px;
-      flex-wrap: wrap;
-    }
-    .preview-section {
-      flex: 1;
-      min-width: 280px;
-      display: flex;
       flex-direction: column;
-      gap: 8px;
+      justify-content: flex-start;
     }
     .preview-title {
       font-weight: 600;
       font-size: 18px;
       color: #8f3f78;
+      margin-bottom: 6px;
     }
     .preview-content {
       background: #f9f0fb;
@@ -155,6 +151,8 @@
       padding: 12px;
       font-size: 16px;
       line-height: 1.3;
+      flex: 1;
+      overflow: auto;
     }
 
     /* Right area: card + favorites */
@@ -241,7 +239,6 @@
       color:#3a2a3a;
       margin:0 auto;
     }
-
     .heart {
       position:absolute;
       top:10px;
@@ -401,9 +398,8 @@
     }
 
     @media (max-width: 1100px) {
-      .page { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; }
+      .page { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr 25vh; grid-template-areas: "header" "right" "grid" "preview"; }
       .right-area { flex-direction: column; }
-      .preview { padding: 5px; }
     }
   </style>
 </head>
@@ -454,7 +450,7 @@
       </div>
     </div>
 
-    <!-- Preview area -->
+    <!-- Preview (bottom-left) -->
     <div class="preview" id="preview">
       <div class="preview-box">
         <div class="preview-section">
@@ -478,7 +474,7 @@
     const SEEN_KEY = 'seenReasons';
     const FAVORITES_KEY = 'favoriteReasons';
 
-    // Placeholder reasons (replace with your real ones)
+    // Placeholder reasons
     const reasons = Array.from({length: NUM_REASONS}, (_, i) => `Reason content for #${i+1}`);
 
     function shuffle(array) {
@@ -546,6 +542,8 @@
     const favListEl = document.getElementById('fav-list');
     const countdownEl = document.getElementById('countdown');
 
+    let currentPreview = null;
+
     // === Renderers ===
     function renderGrid() {
       gridEl.innerHTML = '';
@@ -554,15 +552,25 @@
         item.className = 'grid-item';
         item.dataset.index = i;
         item.textContent = i + 1;
-        if (seen.has(i)) item.classList.add('seen');
-        item.addEventListener('click', () => openPreview(i));
+        if (seen.has(i)) {
+          item.classList.add('seen');
+          item.addEventListener('click', () => togglePreview(i));
+        }
         gridEl.appendChild(item);
       }
     }
 
-    function openPreview(idx) {
-      previewTitle.textContent = `Reason #${idx+1}`;
-      previewContent.textContent = reasons[idx];
+    function togglePreview(idx) {
+      if (currentPreview === idx) {
+        // hide
+        previewTitle.textContent = 'Click a seen square';
+        previewContent.textContent = 'Reason will appear here.';
+        currentPreview = null;
+      } else {
+        currentPreview = idx;
+        previewTitle.textContent = `Reason #${idx+1}`;
+        previewContent.textContent = reasons[idx];
+      }
     }
 
     function updateCardBack() {
@@ -658,7 +666,6 @@
     cardEl.addEventListener('click', () => {
       cardEl.classList.toggle('flipped');
     });
-
     heartEl.addEventListener('click', e => {
       e.stopPropagation();
       const idx = todayIndex;
@@ -683,7 +690,8 @@
     renderFavorites();
     updateCountdown();
     setInterval(updateCountdown, 1000);
-    openPreview(todayIndex);
+    // default preview is today's reason if seen
+    togglePreview(todayIndex);
   </script>
 </body>
 </html>
