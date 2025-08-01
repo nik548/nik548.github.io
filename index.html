@@ -1155,6 +1155,19 @@
       updateCountdown();
       updateDebugPanel();
     }, 1000);
+
+    // fade in the illustration once it's loaded
+    const illustrationImg = document.querySelector('.illustration-img');
+    if (illustrationImg) {
+    illustrationImg.addEventListener('load', () => {
+        document.getElementById('illustration-wrapper').classList.add('visible');
+    });
+    if (illustrationImg.complete) {
+        // already loaded from cache
+        document.getElementById('illustration-wrapper').classList.add('visible');
+    }
+    }
+
   </script>
 </body>
 </html>
