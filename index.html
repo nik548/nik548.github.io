@@ -374,6 +374,35 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    .illustration-wrapper {
+    margin-top: 12px;
+    width: 100%;
+    max-width: 360px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 16px 40px rgba(214,51,108,0.08);
+    position: relative;
+    padding: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .6s ease, transform .6s ease;
+    }
+    .illustration-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+    }
+    .illustration-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+    }
+
     .streak-row {
       display: flex;
       justify-content: space-between;
@@ -536,41 +565,49 @@
 
     <!-- Right: card + favorites + streak -->
     <div class="right-area">
-      <div class="card-wrapper">
+        <div class="card-wrapper">
         <div class="card" id="card">
-          <div class="card-inner">
+            <div class="card-inner">
             <div class="card-face card-front" id="card-front">
-              Click here for today’s reason
+                Click here for today’s reason
             </div>
             <div class="card-face card-back" id="card-back">
-              <div class="heart" id="heart">❤</div>
-              <div class="reason-number" id="reason-number">Reason #--</div>
-              <div id="reason-text"></div>
-              <div id="animal" class="animal"></div>
+                <div class="heart" id="heart">❤</div>
+                <div class="reason-number" id="reason-number">Reason #--</div>
+                <div id="reason-text"></div>
+                <div id="animal" class="animal"></div>
             </div>
-          </div>
+            </div>
         </div>
+    
         <div class="streak-box" id="streak-box">
-          <div class="streak-row">
+            <div class="streak-row">
             <div class="streak-label">💖 Streak:</div>
             <div><strong><span id="love-streak-count">0</span> day<span id="streak-s-plural">s</span></strong></div>
-          </div>
-          <div class="streak-row">
+            </div>
+            <div class="streak-row">
             <div class="streak-label">👀 Seen:</div>
             <div>
-              <strong><span id="seen-count">0</span>/100</strong>
-              <div class="progress-bar">
+                <strong><span id="seen-count">0</span>/100</strong>
+                <div class="progress-bar">
                 <div class="progress-fill" id="seen-progress"></div>
-              </div>
+                </div>
             </div>
-          </div>
+            </div>
         </div>
-      </div>
-      <div class="favorites">
-        <h2>Favorites</h2>
-        <div class="fav-list" id="fav-list"></div>
-      </div>
+    
+        <!-- Illustration goes here, directly under the streak box -->
+        <div class="illustration-wrapper" id="illustration-wrapper">
+            <img src="couple-illustration.png" alt="Stylized illustration of us" class="illustration-img" loading="lazy" />
+        </div>
+        </div>
+  
+    <div class="favorites">
+      <h2>Favorites</h2>
+      <div class="fav-list" id="fav-list"></div>
     </div>
+  </div>
+  
 
     <!-- Preview (bottom-left) -->
     <div class="preview" id="preview">
