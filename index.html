@@ -380,7 +380,6 @@
     width: 100%;
     max-width: 360px;
     border-radius: 14px;
-    overflow: hidden;
     background: #fff;
     box-shadow: 0 16px 40px rgba(214,51,108,0.08);
     position: relative;
@@ -388,6 +387,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    /* allow the wrapper to grow with its content */
+    overflow: visible; 
     opacity: 0;
     transform: translateY(8px);
     transition: opacity .6s ease, transform .6s ease;
@@ -397,11 +398,13 @@
     transform: translateY(0);
     }
     .illustration-img {
-    width: 100%;
-    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     display: block;
+    object-fit: contain;
     border-radius: 10px;
     }
+
 
     .streak-row {
       display: flex;
