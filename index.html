@@ -387,19 +387,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* allow the wrapper to grow with its content */
-    overflow: visible; 
     opacity: 0;
     transform: translateY(8px);
     transition: opacity .6s ease, transform .6s ease;
+    min-height: 0; /* help in flex layouts to avoid unintended clipping */
     }
     .illustration-wrapper.visible {
     opacity: 1;
     transform: translateY(0);
     }
     .illustration-img {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: auto;
     display: block;
     object-fit: contain;
     border-radius: 10px;
