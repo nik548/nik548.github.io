@@ -194,12 +194,13 @@
 
     /* Right area: card + favorites */
     .right-area {
-      grid-area: right;
-      display: flex;
-      gap: 30px;
-      align-items: flex-start;
-      overflow: hidden;
+    grid-area: right;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    overflow: visible; /* allow the illustration to expand without being cropped */
     }
+
     .card-wrapper {
     flex: 1;
     display: flex;
