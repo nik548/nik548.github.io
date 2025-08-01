@@ -208,10 +208,9 @@
     align-items: center;
     gap: 12px;
     min-width: 340px;
-    justify-content: flex-start; /* stack top-down so the illustration doesn’t get pushed beyond the container */
+    justify-content: center;
     min-height: 0;
     }
-
     .card {
       width: 100%;
       max-width: 360px;
@@ -393,11 +392,8 @@
     opacity: 0;
     transform: translateY(8px);
     transition: opacity .6s ease, transform .6s ease;
-    min-height: 0;
-    flex: 0 0 auto; /* prevent unwanted shrink/grow */
-    align-self: flex-start; /* keep it aligned under streak box */
-}
-
+    min-height: 0; /* help in flex layouts to avoid unintended clipping */
+    }
     .illustration-wrapper.visible {
     opacity: 1;
     transform: translateY(0);
