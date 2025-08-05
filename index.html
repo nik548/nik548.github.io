@@ -255,6 +255,13 @@
       display:flex;
       flex-direction:column;
       justify-content:center;
+
+        /* new: wrap & scroll */
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-y: auto;
+    padding: 16px;
+    flex: 1;             /* so it can shrink/grow */
     }
     .card-back {
       background:#ffe4e1;
@@ -276,6 +283,12 @@
       font-weight:500;
       color:#3a2a3a;
       margin:0 auto;
+
+        /* new */
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-y: auto;
+    flex: 1;
     }
 
     .heart {
@@ -793,39 +806,46 @@
     }
 
     // === State initialization ===
+
+    // 1️⃣ Load or seed the shuffle
     let shuffledOrder = JSON.parse(localStorage.getItem(SHUFFLED_ORDER_KEY) || 'null');
-    let shuffledPtr = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
-    if (!shuffledOrder || !Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
-      shuffledOrder = shuffle([...Array(NUM_REASONS).keys()]);
-      shuffledPtr = 0;
-      localStorage.setItem(SHUFFLED_ORDER_KEY, JSON.stringify(shuffledOrder));
-      localStorage.setItem(SHUFFLED_PTR_KEY, shuffledPtr);
+    let shuffledPtr   = parseInt(localStorage.getItem(SHUFFLED_PTR_KEY) || '0', 10);
+
+    if (!Array.isArray(shuffledOrder) || shuffledOrder.length !== NUM_REASONS) {
+    shuffledOrder = shuffle([...Array(NUM_REASONS).keys()]);
+    shuffledPtr   = 0;
+    localStorage.setItem(SHUFFLED_ORDER_KEY, JSON.stringify(shuffledOrder));
+    localStorage.setItem(SHUFFLED_PTR_KEY, String(shuffledPtr));
     }
 
+    // 2️⃣ Load existing seen/favorites (never clobber on load)
+    const seen      = new Set(JSON.parse(localStorage.getItem(SEEN_KEY)      || '[]'));
+    let   favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY)        || '[]');
+
+    // 3️⃣ Determine today’s reason (reuse until expiry)
     const nextReset = getNextResetTimeEST();
-    let todayIndex;
-    const storedIdx = parseInt(localStorage.getItem(TODAY_IDX_KEY), 10);
-    const storedExpiry = localStorage.getItem(EXPIRY_KEY);
-    let seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
-    let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+    const storedIdx = parseInt(localStorage.getItem(TODAY_IDX_KEY) || 'NaN', 10);
+    const storedExp = localStorage.getItem(EXPIRY_KEY);
+    let   todayIndex;
 
-    const now = getNow();
-    if (!isNaN(storedIdx) && storedExpiry && new Date(storedExpiry) > now) {
-      todayIndex = storedIdx;
+    if (!isNaN(storedIdx) && storedExp && new Date(storedExp) > getNow()) {
+    // still valid, reuse
+    todayIndex = storedIdx;
     } else {
-      if (shuffledPtr >= NUM_REASONS) shuffledPtr = 0;
-      todayIndex = shuffledOrder[shuffledPtr];
-      shuffledPtr += 1;
-      localStorage.setItem(SHUFFLED_PTR_KEY, shuffledPtr);
-      localStorage.setItem(TODAY_IDX_KEY, todayIndex);
-      localStorage.setItem(EXPIRY_KEY, nextReset);
-      seen.add(todayIndex);
-      localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
+    // pick a brand-new one
+    if (shuffledPtr >= NUM_REASONS) shuffledPtr = 0;
+    todayIndex = shuffledOrder[shuffledPtr++];
+    localStorage.setItem(SHUFFLED_PTR_KEY, String(shuffledPtr));
+    localStorage.setItem(TODAY_IDX_KEY,   String(todayIndex));
+    localStorage.setItem(EXPIRY_KEY,      nextReset.toString());
     }
+
+    // 4️⃣ Mark “seen” if new and persist
     if (!seen.has(todayIndex)) {
-      seen.add(todayIndex);
-      localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(seen)));
+    seen.add(todayIndex);
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...seen]));
     }
+
 
     // === DOM refs ===
     const gridEl = document.getElementById('grid');
